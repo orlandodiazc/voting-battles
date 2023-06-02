@@ -7,7 +7,6 @@ export default function Player({
   values,
   changeBoard,
 }: {
-  totalInputLength: number;
   breakValues: number[];
   playerId: number;
   values: string[];
