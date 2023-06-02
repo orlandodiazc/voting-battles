@@ -30,17 +30,25 @@ export default function App() {
     if (newIndex < 0 || newIndex > settings.stages.length - 1) return;
     setIndex(newIndex);
   }
-  const [scores, setScores] = useState(initialScores);
+  const [scores, setScores] = useState<string[][][]>(initialScores);
   function updateBoard(
     stageId: number,
     playerId: number,
-    value: string,
+    newValue: string,
     inputId: number
   ) {
-    const scoresDraft = scores;
-    scoresDraft[playerId][stageId][inputId] = value;
-    console.log(scoresDraft);
-    setScores(scoresDraft);
+    setScores((prev) =>
+      prev.map((player, idx) => {
+        if (idx !== playerId) return player;
+        return player.map((stage, idx) => {
+          if (idx !== stageId) return stage;
+          return stage.map((prevValue, idx) => {
+            if (idx !== inputId) return prevValue;
+            return newValue;
+          });
+        });
+      })
+    );
   }
   return (
     <main className="min-h-screen grid place-content-center">
@@ -51,27 +59,27 @@ export default function App() {
             setIndex(settings.stages.findIndex((stage) => stage.name === value))
           }
         >
-          {settings.stages.map((stage, stageIdx) => {
-            const totalInputLength = stage.setup.reduce(
-              (acc, curr) => acc + curr,
-              0
-            );
-            const breakValues = stage.setup.map((value, idx) =>
-              stage.setup.slice(0, idx + 1).reduce((a, b) => a + b)
+          {settings.stages.map(({ name: stageName, setup }, stageIdx) => {
+            const breakValues = setup.map((value, idx) =>
+              setup.slice(0, idx + 1).reduce((a, b) => a + b)
             );
 
             return (
-              <TabsContent value={stage.name} key={stageIdx}>
-                <h2 className="mb-2">{stage.name}</h2>
+              <TabsContent value={stageName} key={stageIdx}>
+                <h2 className="mb-2">{stageName}</h2>
                 <table className="border-separate border-spacing-0.5">
                   <thead>
                     <tr className="text-[10px] text-center">
-                      <td colSpan={totalInputLength + 1}></td>
+                      <td
+                        colSpan={setup.reduce((acc, curr) => acc + curr, 1)}
+                      ></td>
                       <td>Tecnicas</td>
                       <td>Flow</td>
                       <td>Escena</td>
                       <td>Total</td>
                     </tr>
+                  </thead>
+                  <tbody>
                     <tr className="[&>*:nth-last-child(-n+4)]:px-1.5">
                       <td className="pe-4">name</td>
                       <Player
@@ -79,13 +87,11 @@ export default function App() {
                         changeBoard={(playerId, value, inputId) => {
                           updateBoard(stageIdx, playerId, value, inputId);
                         }}
-                        totalInputLength={totalInputLength}
                         breakValues={breakValues}
                         values={scores[0][stageIdx]}
                       />
                     </tr>
-                  </thead>
-                  <tbody></tbody>
+                  </tbody>
                 </table>
               </TabsContent>
             );
