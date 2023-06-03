@@ -23,13 +23,13 @@ function createInputList(setup: number[]) {
 const initialScores = Array(2).fill([
   ...settings.stages.map(({ setup }) => createInputList(setup)),
 ]);
-
 export default function App() {
   const [index, setIndex] = useState(0);
   function updateIndex(newIndex: number) {
     if (newIndex < 0 || newIndex > settings.stages.length - 1) return;
     setIndex(newIndex);
   }
+
   const [scores, setScores] = useState<string[][][]>(initialScores);
   function updateBoard(
     stageId: number,
@@ -59,39 +59,88 @@ export default function App() {
             setIndex(settings.stages.findIndex((stage) => stage.name === value))
           }
         >
-          {settings.stages.map(({ name: stageName, setup }, stageIdx) => {
-            const breakValues = setup.map((value, idx) =>
-              setup.slice(0, idx + 1).reduce((a, b) => a + b)
+          {settings.stages.map((stage, stageIdx) => {
+            const totalInputLength = stage.setup.reduce(
+              (acc, curr) => acc + curr,
+              0
             );
+            const breakValues = stage.setup.map((value, idx) =>
+              stage.setup.slice(0, idx + 1).reduce((a, b) => a + b)
+            );
+            const players =
+              stageIdx % 2 === 0
+                ? settings.playersName
+                : [...settings.playersName].reverse();
+            console.log(players);
 
             return (
-              <TabsContent value={stageName} key={stageIdx}>
-                <h2 className="mb-2">{stageName}</h2>
+              <TabsContent tabIndex={-1} value={stage.name} key={stageIdx}>
+                <h2 className="mb-2">{stage.name}</h2>
                 <table className="border-separate border-spacing-0.5">
                   <thead>
                     <tr className="text-[10px] text-center">
-                      <td
-                        colSpan={setup.reduce((acc, curr) => acc + curr, 1)}
-                      ></td>
+                      <td colSpan={totalInputLength + 1}></td>
                       <td>Tecnicas</td>
                       <td>Flow</td>
                       <td>Escena</td>
                       <td>Total</td>
                     </tr>
                   </thead>
-                  <tbody>
-                    <tr className="[&>*:nth-last-child(-n+4)]:px-1.5">
-                      <td className="pe-4">name</td>
-                      <Player
-                        playerId={0}
-                        changeBoard={(playerId, value, inputId) => {
-                          updateBoard(stageIdx, playerId, value, inputId);
-                        }}
-                        breakValues={breakValues}
-                        values={scores[0][stageIdx]}
-                      />
-                    </tr>
-                  </tbody>
+                  <RovingTabindexRoot as="tbody" active="00">
+                    {players.map((name, playerIdx) => (
+                      <React.Fragment key={playerIdx}>
+                        <tr
+                          className="[&>*:nth-last-child(-n+4)]:px-1.5 align-top"
+                          key={playerIdx}
+                        >
+                          <td className="pt-1">{name}</td>
+                          <Player
+                            playerId={playerIdx}
+                            changeBoard={(playerId, value, inputId) => {
+                              updateBoard(stageIdx, playerId, value, inputId);
+                            }}
+                            breakValues={breakValues}
+                            values={scores[playerIdx][stageIdx]}
+                          />
+                        </tr>
+                        {stage.isResponse && name === players[1] && (
+                          <tr>
+                            <td colSpan={1}></td>
+                            {Array.from(Array(totalInputLength).keys()).map(
+                              (checkboxIdx) => (
+                                <td key={checkboxIdx} className="text-center">
+                                  <input
+                                    type="checkbox"
+                                    onChange={(e) =>
+                                      setScores((prev) =>
+                                        prev.map((player, idx) => {
+                                          if (idx !== playerIdx) return player;
+                                          return player.map((stage, idx) => {
+                                            if (idx !== stageIdx) return stage;
+                                            return stage.map(
+                                              (prevValue, idx) => {
+                                                if (idx !== checkboxIdx)
+                                                  return prevValue;
+                                                const newValue = e.target
+                                                  .checked
+                                                  ? Number(prevValue) + 1
+                                                  : Number(prevValue) - 1;
+                                                return newValue.toString();
+                                              }
+                                            );
+                                          });
+                                        })
+                                      )
+                                    }
+                                  />
+                                </td>
+                              )
+                            )}
+                          </tr>
+                        )}
+                      </React.Fragment>
+                    ))}
+                  </RovingTabindexRoot>
                 </table>
               </TabsContent>
             );
