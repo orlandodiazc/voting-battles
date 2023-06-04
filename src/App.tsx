@@ -2,15 +2,16 @@ import React, { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./components/ui/tabs";
 import { MdChevronRight, MdChevronLeft } from "react-icons/md";
 
+import { RovingTabindexRoot } from "./components/roving-tabindex";
 import Player from "./components/player";
 
 const settings = {
   stages: [
-    { name: "Incremental", setup: [6] },
-    { name: "Random", setup: [6] },
-    { name: "Libre 1", setup: [6] },
-    { name: "Libre 2", setup: [6] },
-    { name: "Deluxe", setup: [2, 5] },
+    { name: "Incremental", setup: [6], isResponse: false },
+    { name: "Random", setup: [6], isResponse: false },
+    { name: "Libre 1", setup: [6], isResponse: true },
+    { name: "Libre 2", setup: [6], isResponse: true },
+    { name: "Deluxe", setup: [2, 5], isResponse: false },
   ],
   playersName: ["Chuty", "Bnet"],
 };
@@ -71,7 +72,6 @@ export default function App() {
               stageIdx % 2 === 0
                 ? settings.playersName
                 : [...settings.playersName].reverse();
-            console.log(players);
 
             return (
               <TabsContent tabIndex={-1} value={stage.name} key={stageIdx}>

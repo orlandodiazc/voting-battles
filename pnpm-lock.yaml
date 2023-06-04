@@ -14,6 +14,9 @@ dependencies:
   clsx:
     specifier: ^1.2.1
     version: 1.2.1
+  is-hotkey:
+    specifier: ^0.2.0
+    version: 0.2.0
   react:
     specifier: ^18.2.0
     version: 18.2.0
@@ -28,6 +31,9 @@ dependencies:
     version: 1.0.5(tailwindcss@3.3.2)
 
 devDependencies:
+  '@types/is-hotkey':
+    specifier: ^0.1.7
+    version: 0.1.7
   '@types/node':
     specifier: ^20.2.5
     version: 20.2.5
@@ -862,6 +868,10 @@ packages:
       react: 18.2.0
     dev: false
 
+  /@types/is-hotkey@0.1.7:
+    resolution: {integrity: sha512-yB5C7zcOM7idwYZZ1wKQ3pTfjA9BbvFqRWvKB46GFddxnJtHwi/b9y84ykQtxQPg5qhdpg4Q/kWU3EGoCTmLzQ==}
+    dev: true
+
   /@types/json-schema@7.0.12:
     resolution: {integrity: sha512-Hr5Jfhc9eYOQNPYO5WLDq/n4jqijdHNlDXjuAQkkt+mWdQR+XJToOHrsD4cPaMXpn6KO7y2+wM8AZEs8VpBLVA==}
     dev: true
@@ -1661,6 +1671,10 @@ packages:
     engines: {node: '>=0.10.0'}
     dependencies:
       is-extglob: 2.1.1
+
+  /is-hotkey@0.2.0:
+    resolution: {integrity: sha512-UknnZK4RakDmTgz4PI1wIph5yxSs/mvChWs9ifnlXsKuXgWmOkY/hAE0H/k2MIqH0RlRye0i1oC07MCRSD28Mw==}
+    dev: false
 
   /is-number@7.0.0:
     resolution: {integrity: sha512-41Cifkg6e8TylSpdtTpeLVMqvSBEVzTttHvERD741+pnZ8ANv0004MRL43QKPDlK9cGvNp6NZWZUBlbGXYxxng==}
