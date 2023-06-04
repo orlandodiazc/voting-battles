@@ -1,56 +1,59 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./components/ui/tabs";
 import { MdChevronRight, MdChevronLeft } from "react-icons/md";
 
 import { RovingTabindexRoot } from "./components/roving-tabindex";
 import Player from "./components/player";
+import { BoardContext } from "./context/board-context";
 
-const settings = {
-  stages: [
-    { name: "Incremental", setup: [6], isResponse: false },
-    { name: "Random", setup: [6], isResponse: false },
-    { name: "Libre 1", setup: [6], isResponse: true },
-    { name: "Libre 2", setup: [6], isResponse: true },
-    { name: "Deluxe", setup: [2, 5], isResponse: false },
-  ],
-  playersName: ["Chuty", "Bnet"],
-};
+// const settings = {
+//   stages: [
+//     { name: "Incremental", setup: [6], isResponse: false },
+//     { name: "Random", setup: [6], isResponse: false },
+//     { name: "Libre 1", setup: [6], isResponse: true },
+//     { name: "Libre 2", setup: [6], isResponse: true },
+//     { name: "Deluxe", setup: [2, 5], isResponse: false },
+//   ],
+//   playersName: ["Chuty", "Bnet"],
+// };
 
-function createInputList(setup: number[]) {
-  const length = setup.reduce((acc, curr) => acc + curr, 0);
-  return Array(length + 3).fill("");
-}
+// function createInputList(setup: number[]) {
+//   const length = setup.reduce((acc, curr) => acc + curr, 0);
+//   return Array(length + 3).fill("");
+// }
 
-const initialScores = Array(2).fill([
-  ...settings.stages.map(({ setup }) => createInputList(setup)),
-]);
+// const initialScores = Array(2).fill([
+//   ...settings.stages.map(({ setup }) => createInputList(setup)),
+// ]);
 export default function App() {
+  const { scores, settings } = useContext(BoardContext);
+
   const [index, setIndex] = useState(0);
   function updateIndex(newIndex: number) {
     if (newIndex < 0 || newIndex > settings.stages.length - 1) return;
     setIndex(newIndex);
   }
 
-  const [scores, setScores] = useState<string[][][]>(initialScores);
-  function updateBoard(
-    stageId: number,
-    playerId: number,
-    newValue: string,
-    inputId: number
-  ) {
-    setScores((prev) =>
-      prev.map((player, idx) => {
-        if (idx !== playerId) return player;
-        return player.map((stage, idx) => {
-          if (idx !== stageId) return stage;
-          return stage.map((prevValue, idx) => {
-            if (idx !== inputId) return prevValue;
-            return newValue;
-          });
-        });
-      })
-    );
-  }
+  // const [scores, setScores] = useState<string[][][]>(initialScores);
+  // function updateBoard(
+  //   stageId: number,
+  //   playerId: number,
+  //   newValue: string,
+  //   inputId: number
+  // ) {
+  //   setScores((prev) =>
+  //     prev.map((player, idx) => {
+  //       if (idx !== playerId) return player;
+  //       return player.map((stage, idx) => {
+  //         if (idx !== stageId) return stage;
+  //         return stage.map((prevValue, idx) => {
+  //           if (idx !== inputId) return prevValue;
+  //           return newValue;
+  //         });
+  //       });
+  //     })
+  //   );
+  // }
   return (
     <main className="min-h-screen grid place-content-center">
       <section className="bg-slate-900 px-8 py-6 rounded-lg">
@@ -96,11 +99,9 @@ export default function App() {
                           <td className="pt-1">{name}</td>
                           <Player
                             playerId={playerIdx}
-                            changeBoard={(playerId, value, inputId) => {
-                              updateBoard(stageIdx, playerId, value, inputId);
-                            }}
+                            stageId={stageIdx}
                             breakValues={breakValues}
-                            values={scores[playerIdx][stageIdx]}
+                            values={scores[playerIdx][stageIdx].values}
                           />
                         </tr>
                         {stage.isResponse && name === players[1] && (
@@ -109,30 +110,7 @@ export default function App() {
                             {Array.from(Array(totalInputLength).keys()).map(
                               (checkboxIdx) => (
                                 <td key={checkboxIdx} className="text-center">
-                                  <input
-                                    type="checkbox"
-                                    onChange={(e) =>
-                                      setScores((prev) =>
-                                        prev.map((player, idx) => {
-                                          if (idx !== playerIdx) return player;
-                                          return player.map((stage, idx) => {
-                                            if (idx !== stageIdx) return stage;
-                                            return stage.map(
-                                              (prevValue, idx) => {
-                                                if (idx !== checkboxIdx)
-                                                  return prevValue;
-                                                const newValue = e.target
-                                                  .checked
-                                                  ? Number(prevValue) + 1
-                                                  : Number(prevValue) - 1;
-                                                return newValue.toString();
-                                              }
-                                            );
-                                          });
-                                        })
-                                      )
-                                    }
-                                  />
+                                  <input type="checkbox" />
                                 </td>
                               )
                             )}

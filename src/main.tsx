@@ -4,6 +4,7 @@ import App from "./App";
 import "./index.css";
 import "@fontsource-variable/inter";
 import "./context/board-context";
+import { BoardContextProvider } from "./context/board-context";
 
 if (
   localStorage.getItem("color-theme") === "dark" ||
@@ -17,6 +18,8 @@ if (
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>
-    <App />
+    <BoardContextProvider>
+      <App />
+    </BoardContextProvider>
   </React.StrictMode>
 );

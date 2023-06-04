@@ -4,13 +4,13 @@ import Input from "./input";
 export default function Player({
   breakValues,
   playerId,
+  stageId,
   values,
-  changeBoard,
 }: {
   breakValues: number[];
   playerId: number;
+  stageId: number;
   values: string[];
-  changeBoard: (playerId: number, value: string, inputId: number) => void;
 }) {
   const totalPlayer = values.reduce((acc, curr) => acc + Number(curr), 0);
   return (
@@ -26,10 +26,8 @@ export default function Player({
             <Input
               playerId={playerId}
               inputId={idx}
+              stageId={stageId}
               value={value}
-              changeValue={(value, inputId) =>
-                changeBoard(playerId, value, inputId)
-              }
               maxValue={maxValue}
             />
           </td>

@@ -101,7 +101,7 @@ const scores: Player[] = Array(2).fill([
   ...settings.stages.map(({ setup, isResponse }) => {
     const length = setup.reduce((acc, curr) => acc + curr, 0);
     return {
-      values: Array(length).fill(""),
+      values: Array(length + 3).fill(""),
       ...(isResponse && { extraValues: Array(length).fill(false) }),
       totalPlayer: 0,
     };
@@ -115,15 +115,18 @@ const initialValue: { settings: Settings; scores: Player[] } = {
 type BoardContext = {
   settings: Settings;
   scores: Player[];
-  setVote?: (
+  setVote: (
     playerId: number,
     stageId: number,
     inputId: number,
     newValue: string
   ) => void;
 };
-console.log(scores);
-const BoardContext = createContext<BoardContext>({ settings, scores });
+export const BoardContext = createContext<BoardContext>({
+  scores,
+  settings,
+  setVote: () => undefined,
+});
 
 export const BoardContextProvider = ({ children }: { children: ReactNode }) => {
   const [board, boardDispatch] = useReducer(boardReducer, initialValue);

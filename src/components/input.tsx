@@ -5,23 +5,26 @@ import {
   getPrevFocusableId,
   useRovingTabindex,
 } from "./roving-tabindex";
-import { ChangeEvent } from "react";
+import { ChangeEvent, useContext } from "react";
+import { BoardContext } from "../context/board-context";
 
 export default function Input({
   inputId,
   value,
   playerId,
+  stageId,
   maxValue,
-  changeValue,
 }: {
   inputId: number;
   value: string;
   playerId: number;
+  stageId: number;
   maxValue: number;
-  changeValue: (value: string, inputId: number) => void;
 }) {
   const focusId = playerId.toString() + inputId.toString();
   const { getOrderedItems, getRovingProps } = useRovingTabindex(focusId);
+
+  const { setVote } = useContext(BoardContext);
 
   function handleChange(e: ChangeEvent<HTMLInputElement>) {
     let currentValue = e.target.value;
@@ -30,7 +33,7 @@ export default function Input({
     }
     if (Number(currentValue) > maxValue) currentValue = maxValue.toString();
     if (Number(currentValue) < 0) currentValue = "0";
-    changeValue(currentValue, inputId);
+    setVote(playerId, stageId, inputId, currentValue);
   }
   return (
     <input
@@ -47,13 +50,13 @@ export default function Input({
 
           if (isHotkey("backspace", e) || isHotkey("delete", e)) {
             e.preventDefault();
-            changeValue("", inputId);
+            setVote(playerId, stageId, inputId, "");
           }
 
           if (isHotkey("space", e) || isHotkey(".", e)) {
             e.preventDefault();
             if (value.slice(-2) === ".5" || value === "4") return;
-            changeValue(`${value ? value : "0"}.5`, inputId);
+            setVote(playerId, stageId, inputId, `${value ? value : "0"}.5`);
           }
           if (
             isHotkey("right", e) ||
