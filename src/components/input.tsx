@@ -36,6 +36,7 @@ export default function Input({
     if (Number(currentValue) < 0) currentValue = "0";
     dispatch(setVote({ playerId, stageId, inputId, newValue: currentValue }));
   }
+
   return (
     <input
       type="number"
@@ -45,18 +46,19 @@ export default function Input({
       onChange={handleChange}
       {...getRovingProps<"input">({
         onKeyDown: (e) => {
-          if (isHotkey("+", e) || isHotkey("-", e) || isHotkey("e", e)) {
+          if (isHotkey(["+", "-", "e"], e)) {
             e.preventDefault();
           }
 
-          if (isHotkey("backspace", e) || isHotkey("delete", e)) {
+          if (isHotkey(["backspace", "delete"], e)) {
             e.preventDefault();
             dispatch(setVote({ playerId, stageId, inputId, newValue: "" }));
           }
 
-          if (isHotkey("space", e) || isHotkey(".", e)) {
+          if (isHotkey("space", e) || e.code === "NumpadDecimal") {
             e.preventDefault();
             if (value.slice(-2) === ".5" || value === "4") return;
+
             dispatch(
               setVote({
                 playerId,
@@ -66,14 +68,10 @@ export default function Input({
               })
             );
           }
-          if (
-            isHotkey("right", e) ||
-            isHotkey("tab", e) ||
-            isHotkey("left", e)
-          ) {
+          if (isHotkey(["right", "tab", "left"], e)) {
             const items = getOrderedItems();
             let nextItem: RovingTabindexItem | undefined;
-            if (isHotkey("right", e) || isHotkey("tab", e)) {
+            if (isHotkey(["right", "tab"], e)) {
               e.preventDefault();
               nextItem = getNextFocusableId(items, focusId);
             } else if (isHotkey("left", e)) {
