@@ -5,8 +5,9 @@ import {
   getPrevFocusableId,
   useRovingTabindex,
 } from "./roving-tabindex";
-import { ChangeEvent, useContext } from "react";
-import { BoardContext } from "../context/board-context";
+import { ChangeEvent } from "react";
+import { useBoardDispatch } from "../hooks/hooks";
+import { setVote } from "../redux/slices/boardSlice";
 
 export default function Input({
   inputId,
@@ -24,7 +25,7 @@ export default function Input({
   const focusId = playerId.toString() + inputId.toString();
   const { getOrderedItems, getRovingProps } = useRovingTabindex(focusId);
 
-  const { setVote } = useContext(BoardContext);
+  const dispatch = useBoardDispatch();
 
   function handleChange(e: ChangeEvent<HTMLInputElement>) {
     let currentValue = e.target.value;
@@ -33,7 +34,7 @@ export default function Input({
     }
     if (Number(currentValue) > maxValue) currentValue = maxValue.toString();
     if (Number(currentValue) < 0) currentValue = "0";
-    setVote(playerId, stageId, inputId, currentValue);
+    dispatch(setVote({ playerId, stageId, inputId, newValue: currentValue }));
   }
   return (
     <input
@@ -50,13 +51,20 @@ export default function Input({
 
           if (isHotkey("backspace", e) || isHotkey("delete", e)) {
             e.preventDefault();
-            setVote(playerId, stageId, inputId, "");
+            dispatch(setVote({ playerId, stageId, inputId, newValue: "" }));
           }
 
           if (isHotkey("space", e) || isHotkey(".", e)) {
             e.preventDefault();
             if (value.slice(-2) === ".5" || value === "4") return;
-            setVote(playerId, stageId, inputId, `${value ? value : "0"}.5`);
+            dispatch(
+              setVote({
+                playerId,
+                stageId,
+                inputId,
+                newValue: `${value ? value : "0"}.5`,
+              })
+            );
           }
           if (
             isHotkey("right", e) ||

@@ -1,5 +1,6 @@
 import clsx from "clsx";
 import Input from "./input";
+import { useBoardSelector } from "../hooks/hooks";
 
 export default function Player({
   breakValues,
@@ -12,7 +13,10 @@ export default function Player({
   stageId: number;
   values: string[];
 }) {
-  const totalPlayer = values.reduce((acc, curr) => acc + Number(curr), 0);
+  const stage = useBoardSelector((state) => state.scores[playerId][stageId]);
+  const totalPlayer =
+    stage.values.reduce((acc, curr) => acc + Number(curr), 0) +
+    (stage.extraValues?.reduce((acc, curr) => acc + (curr ? 1 : 0), 0) ?? 0);
   return (
     <>
       {values.map((value, idx) => {

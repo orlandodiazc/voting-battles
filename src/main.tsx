@@ -3,9 +3,8 @@ import ReactDOM from "react-dom/client";
 import App from "./App";
 import "./index.css";
 import "@fontsource-variable/inter";
-import "./context/board-context";
-import { BoardContextProvider } from "./context/board-context";
-
+import { store } from "./redux/store";
+import { Provider } from "react-redux";
 if (
   localStorage.getItem("color-theme") === "dark" ||
   (!("color-theme" in localStorage) &&
@@ -18,8 +17,8 @@ if (
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>
-    <BoardContextProvider>
+    <Provider store={store}>
       <App />
-    </BoardContextProvider>
+    </Provider>
   </React.StrictMode>
 );
