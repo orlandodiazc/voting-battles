@@ -13,9 +13,12 @@ import {
   ElementType,
   MutableRefObject,
 } from "react";
+import { StageType } from "../redux/slices/boardSlice";
+
+type Location = { rowId: number; cellId: number };
 
 export type RovingTabindexItem = {
-  id: string;
+  location: Location;
   element: HTMLElement;
 };
 
@@ -27,11 +30,11 @@ function focusFirst(candidates: HTMLElement[]) {
 }
 
 type RovingTabindexContext = {
-  currentRovingTabindexValue: string | null;
-  setFocusableId: (id: string) => void;
+  currentRovingTabindexValue: Location | null;
+  setFocusableId: (location: Location) => void;
   onShiftTab: () => void;
   getOrderedItems: () => RovingTabindexItem[];
-  elements: MutableRefObject<Map<string, HTMLElement>>;
+  elements: MutableRefObject<Map<Location, HTMLElement>>;
 };
 
 const RovingTabindexContext = createContext<RovingTabindexContext>({
@@ -39,7 +42,7 @@ const RovingTabindexContext = createContext<RovingTabindexContext>({
   setFocusableId: () => {},
   onShiftTab: () => {},
   getOrderedItems: () => [],
-  elements: { current: new Map<string, HTMLElement>() },
+  elements: { current: new Map<Location, HTMLElement>() },
 });
 
 const NODE_SELECTOR = "data-roving-tabindex-node";
@@ -48,7 +51,7 @@ export const NOT_FOCUSABLE_SELECTOR = "data-roving-tabindex-not-focusable";
 
 type RovingTabindexRootBaseProps<T> = {
   children: ReactNode | ReactNode[];
-  active: string | null;
+  active: Location | null;
   as?: T;
 };
 
@@ -64,11 +67,10 @@ export function RovingTabindexRoot<T extends ElementType>({
 }: RovingTabindexRootProps<T>) {
   const Component = as || "div";
   const [isShiftTabbing, setIsShiftTabbing] = useState(false);
-  const [currentRovingTabindexValue, setCurrentRovingTabindexValue] = useState<
-    string | null
-  >(null);
+  const [currentRovingTabindexValue, setCurrentRovingTabindexValue] =
+    useState<Location | null>(null);
   const rootRef = useRef<HTMLDivElement | null>(null);
-  const elements = useRef<Map<string, HTMLElement>>(new Map());
+  const elements = useRef<Map<Location, HTMLElement>>(new Map());
 
   const getOrderedItems = useCallback(() => {
     if (!rootRef.current) return [];
@@ -80,14 +82,14 @@ export function RovingTabindexRoot<T extends ElementType>({
 
     return Array.from(elements.current)
       .sort((a, b) => domElements.indexOf(a[1]) - domElements.indexOf(b[1]))
-      .map(([id, element]) => ({ id, element }));
+      .map(([location, element]) => ({ location, element }));
   }, []);
 
   return (
     <RovingTabindexContext.Provider
       value={{
-        setFocusableId: function (id: string) {
-          setCurrentRovingTabindexValue(id);
+        setFocusableId: function (location: Location) {
+          setCurrentRovingTabindexValue(location);
         },
         onShiftTab: function () {
           setIsShiftTabbing(true);
@@ -107,8 +109,10 @@ export function RovingTabindexRoot<T extends ElementType>({
           if (orderedItems.length === 0) return;
 
           const candidates = [
-            elements.current.get(currentRovingTabindexValue ?? ""),
-            elements.current.get(active ?? ""),
+            elements.current.get(
+              currentRovingTabindexValue ?? { rowId: -1, cellId: -1 }
+            ),
+            elements.current.get(active ?? { rowId: -1, cellId: -1 }),
             ...orderedItems.map((i) => i.element),
           ].filter((element): element is HTMLElement => element != null);
 
@@ -126,86 +130,164 @@ export function RovingTabindexRoot<T extends ElementType>({
 
 export function getNextFocusableId(
   orderedItems: RovingTabindexItem[],
-  id: string
+  location: Location
 ): RovingTabindexItem | undefined {
-  const currIndex = orderedItems.findIndex((item) => item.id === id);
+  const currIndex = orderedItems.findIndex(
+    (item) => item.location === location
+  );
   return orderedItems.at(currIndex === orderedItems.length ? 0 : currIndex + 1);
 }
 
-export function getParentFocusableId(
+export function getNextFocused(
   orderedItems: RovingTabindexItem[],
-  id: string
+  location: Location,
+  type: StageType
 ): RovingTabindexItem | undefined {
-  const currentElement = orderedItems.find((item) => item.id === id)?.element;
+  const { rowId, cellId } = location;
 
-  if (currentElement == null) return;
+  switch (type) {
+    case "MINUTE":
+    case "MINUTE_ANS": {
+      const currIndex = orderedItems.findIndex(
+        ({ location: checkedLocation }) =>
+          checkedLocation.rowId === rowId && checkedLocation.cellId === cellId
+      );
+      return orderedItems.at(
+        currIndex === orderedItems.length ? 0 : currIndex + 1
+      );
+    }
+    case "4X4": {
+      let locationDraft = { rowId: -1, cellId: -1 };
+      if (cellId >= orderedItems.length / 2 - 3) {
+        if (orderedItems.length / 2 - 1 === cellId && rowId === 0) {
+          locationDraft = { rowId: 1, cellId: location.cellId - 2 };
+        } else {
+          locationDraft = { ...location, cellId: location.cellId + 1 };
+        }
+      } else {
+        locationDraft =
+          location.rowId === 0
+            ? { ...location, rowId: 1 }
+            : { rowId: 0, cellId: location.cellId + 1 };
+      }
 
-  let possibleParent = currentElement.parentElement;
+      return orderedItems.find(
+        ({ location: checkedLocation }) =>
+          checkedLocation.rowId === locationDraft.rowId &&
+          checkedLocation.cellId === locationDraft.cellId
+      );
+    }
+    case "8X8": {
+      let locationDraft = { rowId: -1, cellId: -1 };
 
-  while (
-    possibleParent != null &&
-    possibleParent.getAttribute(NODE_SELECTOR) == null &&
-    possibleParent.getAttribute(ROOT_SELECTOR) == null
-  ) {
-    possibleParent = possibleParent?.parentElement ?? null;
+      if (cellId >= orderedItems.length / 2 - 3) {
+        if (orderedItems.length / 2 - 1 === cellId && rowId === 0) {
+          locationDraft = { rowId: 1, cellId: location.cellId - 2 };
+        } else {
+          locationDraft = { ...location, cellId: location.cellId + 1 };
+        }
+      } else {
+        if (location.cellId % 2 === 0) {
+          locationDraft = { ...location, cellId: cellId + 1 };
+        } else if (rowId === 0) {
+          locationDraft = { rowId: 1, cellId: cellId - 1 };
+        } else {
+          locationDraft = { rowId: 0, cellId: cellId + 1 };
+        }
+      }
+
+      return orderedItems.find(
+        ({ location: checkedLocation }) =>
+          checkedLocation.rowId === locationDraft.rowId &&
+          checkedLocation.cellId === locationDraft.cellId
+      );
+    }
+    default:
   }
+}
 
-  return orderedItems.find((item) => item.element === possibleParent);
+export function getPrevFocused(
+  orderedItems: RovingTabindexItem[],
+  location: Location,
+  type: StageType
+): RovingTabindexItem | undefined {
+  const { rowId, cellId } = location;
+
+  switch (type) {
+    case "MINUTE":
+    case "MINUTE_ANS": {
+      const currIndex = orderedItems.findIndex(
+        ({ location: checkedLocation }) =>
+          checkedLocation.rowId === rowId && checkedLocation.cellId === cellId
+      );
+      return orderedItems.at(
+        currIndex === orderedItems.length ? 0 : currIndex - 1
+      );
+    }
+    case "4X4": {
+      let locationDraft = { rowId: -1, cellId: -1 };
+      if (cellId >= orderedItems.length / 2 - 3) {
+        if (orderedItems.length / 2 - 3 === cellId && rowId === 1) {
+          locationDraft = { rowId: 0, cellId: location.cellId + 2 };
+        } else if (orderedItems.length / 2 - 3 === cellId && rowId === 0) {
+          locationDraft = { rowId: 1, cellId: location.cellId - 1 };
+        } else {
+          locationDraft = { ...location, cellId: location.cellId - 1 };
+        }
+      } else {
+        locationDraft =
+          location.rowId === 0
+            ? { rowId: 1, cellId: location.cellId - 1 }
+            : { ...location, rowId: 0 };
+      }
+
+      return orderedItems.find(
+        ({ location: checkedLocation }) =>
+          checkedLocation.rowId === locationDraft.rowId &&
+          checkedLocation.cellId === locationDraft.cellId
+      );
+    }
+    case "8X8": {
+      let locationDraft = { rowId: -1, cellId: -1 };
+      if (cellId >= orderedItems.length / 2 - 3) {
+        if (orderedItems.length / 2 - 3 === cellId && rowId === 1) {
+          locationDraft = { rowId: 0, cellId: location.cellId + 2 };
+        } else if (orderedItems.length / 2 - 3 === cellId && rowId === 0) {
+          locationDraft = { rowId: 1, cellId: location.cellId - 1 };
+        } else {
+          locationDraft = { ...location, cellId: location.cellId - 1 };
+        }
+      } else {
+        if (!(location.cellId % 2 === 0)) {
+          locationDraft = { ...location, cellId: cellId - 1 };
+        } else if (rowId === 0) {
+          locationDraft = { rowId: 1, cellId: cellId - 1 };
+        } else {
+          locationDraft = { rowId: 0, cellId: cellId + 1 };
+        }
+      }
+      return orderedItems.find(
+        ({ location: checkedLocation }) =>
+          checkedLocation.rowId === locationDraft.rowId &&
+          checkedLocation.cellId === locationDraft.cellId
+      );
+    }
+    default:
+  }
 }
 
 export function getPrevFocusableId(
   orderedItems: RovingTabindexItem[],
-  id: string
+  location: Location
 ): RovingTabindexItem | undefined {
-  const currIndex = orderedItems.findIndex((item) => item.id === id);
+  const currIndex = orderedItems.findIndex(
+    (item) => item.location === location
+  );
   if (currIndex === 0) return;
   return orderedItems.at(currIndex - 1);
 }
 
-export function getFirstFocusableId(
-  orderedItems: RovingTabindexItem[]
-): RovingTabindexItem | undefined {
-  return orderedItems.at(0);
-}
-
-export function getLastFocusableId(
-  orderedItems: RovingTabindexItem[]
-): RovingTabindexItem | undefined {
-  return orderedItems.at(-1);
-}
-
-function wrapArray<T>(array: T[], startIndex: number) {
-  return array.map((_, index) => array[(startIndex + index) % array.length]);
-}
-
-export function getNextFocusableIdByTypeahead(
-  items: RovingTabindexItem[],
-  originalId: string,
-  keyPressed: string
-) {
-  const index = items.findIndex(({ id }) => id === originalId);
-  const wrappedItems = wrapArray(items, index);
-  let typeaheadMatchIndex: RovingTabindexItem | undefined;
-
-  for (
-    let index = 0;
-    index < wrappedItems.length - 1 && typeaheadMatchIndex == null;
-    index++
-  ) {
-    const nextItem = wrappedItems.at(index + 1);
-
-    if (
-      nextItem?.element?.textContent?.charAt(0).toLowerCase() ===
-      keyPressed.charAt(0).toLowerCase()
-    ) {
-      typeaheadMatchIndex = nextItem;
-    }
-  }
-
-  return typeaheadMatchIndex;
-}
-
-export function useRovingTabindex(id: string) {
+export function useRovingTabindex(location: Location) {
   const {
     currentRovingTabindexValue,
     setFocusableId,
@@ -213,25 +295,27 @@ export function useRovingTabindex(id: string) {
     getOrderedItems,
     elements,
   } = useContext(RovingTabindexContext);
-
+  const { rowId, cellId } = location;
   return {
     getOrderedItems,
-    isFocusable: currentRovingTabindexValue === id,
+    isFocusable:
+      currentRovingTabindexValue?.cellId === cellId &&
+      currentRovingTabindexValue?.rowId === rowId,
     getRovingProps: <T extends ElementType>(
       props?: ComponentPropsWithoutRef<T>
     ) => ({
       ...props,
       ref: (element: HTMLElement | null) => {
         if (element) {
-          elements.current.set(id, element);
+          elements.current.set(location, element);
         } else {
-          elements.current.delete(id);
+          elements.current.delete(location);
         }
       },
       onMouseDown: (e: MouseEvent) => {
         props?.onMouseDown?.(e);
         if (e.target !== e.currentTarget) return;
-        setFocusableId(id);
+        setFocusableId(location);
       },
       onKeyDown: (e: KeyboardEvent) => {
         props?.onKeyDown?.(e);
@@ -244,10 +328,10 @@ export function useRovingTabindex(id: string) {
       onFocus: (e: FocusEvent) => {
         props?.onFocus?.(e);
         if (e.target !== e.currentTarget) return;
-        setFocusableId(id);
+        setFocusableId(location);
       },
       [NODE_SELECTOR]: true,
-      tabIndex: currentRovingTabindexValue === id ? 0 : -1,
+      tabIndex: currentRovingTabindexValue === location ? 0 : -1,
     }),
   };
 }

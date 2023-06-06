@@ -1,28 +1,28 @@
-import { createSlice, current } from "@reduxjs/toolkit";
+import { createSlice } from "@reduxjs/toolkit";
 import type { PayloadAction } from "@reduxjs/toolkit";
 
+export type StageType = "MINUTE" | "MINUTE_ANS" | "8X8" | "4X4" | "RESULTS";
 type Settings = {
   stages: {
     name: string;
     setup: number[];
-    isResponse: boolean;
-    extraValues?: boolean[];
+    type: StageType;
   }[];
   players: { id: number; name: string }[];
 };
 
 type Stage = { totalPlayer: number; values: string[]; extraValues?: boolean[] };
 type Player = Stage[];
-
 type BoardState = { settings: Settings; scores: Player[] };
 
 const settings: Settings = {
   stages: [
-    { name: "Incremental", setup: [6], isResponse: false },
-    { name: "Random", setup: [6], isResponse: false },
-    { name: "Libre 1", setup: [6], isResponse: true },
-    { name: "Libre 2", setup: [6], isResponse: true },
-    { name: "Deluxe", setup: [2, 5], isResponse: false },
+    { name: "Incremental", setup: [6], type: "MINUTE" },
+    { name: "Random", setup: [6], type: "8X8" },
+    { name: "Libre 1", setup: [6], type: "MINUTE_ANS" },
+    { name: "Libre 2", setup: [6], type: "MINUTE_ANS" },
+    { name: "Deluxe", setup: [2, 5], type: "4X4" },
+    { name: "Results", setup: [6], type: "RESULTS" },
   ],
   players: [
     { id: 0, name: "Chuty" },
@@ -31,16 +31,11 @@ const settings: Settings = {
 };
 
 const scores: Player[] = Array(2).fill([
-  ...settings.stages.map(({ setup, isResponse }) => {
+  ...settings.stages.map(({ setup, type }) => {
     const length = setup.reduce((acc, curr) => acc + curr, 0);
-    if (isResponse)
-      return {
-        values: Array(length + 3).fill(""),
-        extraValues: Array(length).fill(false),
-        totalPlayer: 0,
-      };
     return {
       values: Array(length + 3).fill(""),
+      ...(type === "MINUTE_ANS" && { extraValues: Array(length).fill(false) }),
       totalPlayer: 0,
     };
   }),
@@ -61,9 +56,9 @@ export const boardSlice = createSlice({
     ) => {
       const { playerId, stageId, inputId, newValue } = action.payload;
       state.scores[playerId][stageId].values[inputId] = newValue;
-      state.scores[playerId][stageId].totalPlayer = state.scores[playerId][
-        stageId
-      ].values.reduce((acc, curr) => acc + Number(curr), 0);
+      // state.scores[playerId][stageId].totalPlayer = state.scores[playerId][
+      //   stageId
+      // ].values.reduce((acc, curr) => acc + Number(curr), 0);
     },
     setAnswer: (
       state,
@@ -78,13 +73,13 @@ export const boardSlice = createSlice({
         (value, idx) => (idx === checkboxId ? !value : value)
       );
       state.scores[playerId][stageId].extraValues = newExtraValues;
-      const totalExtra =
-        newExtraValues?.reduce((acc, curr) => acc + (curr ? 1 : 0), 0) ?? 0;
-      state.scores[playerId][stageId].totalPlayer =
-        state.scores[playerId][stageId].values.reduce(
-          (acc, curr) => acc + Number(curr),
-          0
-        ) + totalExtra;
+      // const totalExtra =
+      //   newExtraValues?.reduce((acc, curr) => acc + (curr ? 1 : 0), 0) ?? 0;
+      // state.scores[playerId][stageId].totalPlayer =
+      //   state.scores[playerId][stageId].values.reduce(
+      //     (acc, curr) => acc + Number(curr),
+      //     0
+      //   ) + totalExtra;
     },
   },
 });

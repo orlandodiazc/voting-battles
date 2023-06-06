@@ -1,12 +1,13 @@
 import isHotkey from "is-hotkey";
 import {
   RovingTabindexItem,
-  getNextFocusableId,
+  getNextFocused,
   getPrevFocusableId,
+  getPrevFocused,
   useRovingTabindex,
 } from "./roving-tabindex";
 import { ChangeEvent } from "react";
-import { useBoardDispatch } from "../hooks/hooks";
+import { useBoardDispatch, useBoardSelector } from "../hooks/hooks";
 import { setVote } from "../redux/slices/boardSlice";
 
 export default function Input({
@@ -22,9 +23,12 @@ export default function Input({
   stageId: number;
   maxValue: number;
 }) {
-  const focusId = playerId.toString() + inputId.toString();
-  const { getOrderedItems, getRovingProps } = useRovingTabindex(focusId);
-
+  const focusLocation = {
+    rowId: stageId % 2 === 0 ? playerId : playerId === 0 ? 1 : 0,
+    cellId: inputId,
+  };
+  const { getOrderedItems, getRovingProps } = useRovingTabindex(focusLocation);
+  const { stages } = useBoardSelector((state) => state.settings);
   const dispatch = useBoardDispatch();
 
   function handleChange(e: ChangeEvent<HTMLInputElement>) {
@@ -73,9 +77,17 @@ export default function Input({
             let nextItem: RovingTabindexItem | undefined;
             if (isHotkey(["right", "tab"], e)) {
               e.preventDefault();
-              nextItem = getNextFocusableId(items, focusId);
+              nextItem = getNextFocused(
+                items,
+                focusLocation,
+                stages[stageId].type
+              );
             } else if (isHotkey("left", e)) {
-              nextItem = getPrevFocusableId(items, focusId);
+              nextItem = getPrevFocused(
+                items,
+                focusLocation,
+                stages[stageId].type
+              );
             }
             nextItem?.element.focus();
           }

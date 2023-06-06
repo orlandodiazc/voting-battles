@@ -20,9 +20,9 @@ export default function Player({
   return (
     <>
       {values.map((value, idx) => {
-        const padding = breakValues.some((breakIdx) => breakIdx === idx)
-          ? "ps-2"
-          : "ps-0.5";
+        const padding = breakValues.some((breakIdx) => breakIdx - 1 === idx)
+          ? "pe-4"
+          : "pe-0.5";
 
         const maxValue = idx >= values.length - 3 ? 2 : 4;
         return (

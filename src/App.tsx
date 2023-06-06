@@ -16,7 +16,7 @@ export default function App() {
 
   return (
     <main className="min-h-screen grid place-content-center">
-      <section className="bg-slate-900 px-8 py-6 rounded-lg">
+      <section className="bg-slate-900 px-6 py-8 rounded-lg min-w-[600px] max-w-xl grid">
         <Tabs
           value={stages[index].name}
           onValueChange={(value) =>
@@ -24,19 +24,19 @@ export default function App() {
           }
         >
           <Board />
-          <div className="inline-flex items-center gap-1">
+          <div className="flex justify-center">
             <button onClick={() => updateIndex(index - 1)}>
-              <MdChevronLeft size={30} />
+              <MdChevronLeft size={26} />
             </button>
             <TabsList>
               {stages.map(({ name }, idx) => (
                 <TabsTrigger value={name} key={idx}>
-                  {name}
+                  {name === "Results" ? name : idx}
                 </TabsTrigger>
               ))}
             </TabsList>
             <button onClick={() => updateIndex(index + 1)}>
-              <MdChevronRight size={30} />
+              <MdChevronRight size={26} />
             </button>
           </div>
         </Tabs>
