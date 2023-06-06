@@ -5,7 +5,7 @@ settings:
   excludeLinksFromLockfile: false
 
 dependencies:
-  '@fontsource-variable/inter':
+  '@fontsource/poppins':
     specifier: ^5.0.2
     version: 5.0.2
   '@radix-ui/react-tabs':
@@ -559,8 +559,8 @@ packages:
     engines: {node: ^12.22.0 || ^14.17.0 || >=16.0.0}
     dev: true
 
-  /@fontsource-variable/inter@5.0.2:
-    resolution: {integrity: sha512-8b+AfzKPOnF+oHgPTpjILQxZUWTnccu/8saZHmMp9hVYcrYZAYZUmAhjCVdy77m19bnbWNVdeMfo63s7fjARPA==}
+  /@fontsource/poppins@5.0.2:
+    resolution: {integrity: sha512-504RESq2qbyVxxpjP2TyVQODOWakuBHBD3AtYurtmNHosC4x+mjyOlRSdW2QjsILezlwFCnLkYuGUzYiV44sEg==}
     dev: false
 
   /@humanwhocodes/config-array@0.11.8:
