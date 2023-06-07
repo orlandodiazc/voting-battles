@@ -83,6 +83,10 @@
     appearance: textfield;
     -moz-appearance: textfield;
   }
+
+  th {
+    @apply font-normal;
+  }
 }
 
 @layer base {
