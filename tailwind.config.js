@@ -16,6 +16,9 @@ export default {
       sans: ["var(--font-sans)", ...fontFamily.sans],
     },
     extend: {
+      borderWidth: {
+        14: "14px",
+      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
