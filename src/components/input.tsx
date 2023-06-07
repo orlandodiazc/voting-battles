@@ -2,19 +2,18 @@ import isHotkey from "is-hotkey";
 import {
   RovingTabindexItem,
   getNextFocused,
-  getPrevFocusableId,
   getPrevFocused,
   useRovingTabindex,
 } from "./roving-tabindex";
 import { ChangeEvent } from "react";
 import { useBoardDispatch, useBoardSelector } from "../hooks/hooks";
-import { setVote } from "../redux/slices/boardSlice";
+import { addVote } from "../redux/slices/boardSlice";
 
 export default function Input({
   inputId,
-  value,
   playerId,
   stageId,
+  value,
   maxValue,
 }: {
   inputId: number;
@@ -27,8 +26,13 @@ export default function Input({
     rowId: stageId % 2 === 0 ? playerId : playerId === 0 ? 1 : 0,
     cellId: inputId,
   };
+
   const { getOrderedItems, getRovingProps } = useRovingTabindex(focusLocation);
-  const { stages } = useBoardSelector((state) => state.settings);
+
+  const stageType = useBoardSelector(
+    (state) => state.settings.stages[stageId].type
+  );
+
   const dispatch = useBoardDispatch();
 
   function handleChange(e: ChangeEvent<HTMLInputElement>) {
@@ -38,7 +42,7 @@ export default function Input({
     }
     if (Number(currentValue) > maxValue) currentValue = maxValue.toString();
     if (Number(currentValue) < 0) currentValue = "0";
-    dispatch(setVote({ playerId, stageId, inputId, newValue: currentValue }));
+    dispatch(addVote({ playerId, stageId, inputId, newValue: currentValue }));
   }
 
   return (
@@ -56,7 +60,7 @@ export default function Input({
 
           if (isHotkey(["backspace", "delete"], e)) {
             e.preventDefault();
-            dispatch(setVote({ playerId, stageId, inputId, newValue: "" }));
+            dispatch(addVote({ playerId, stageId, inputId, newValue: "" }));
           }
 
           if (isHotkey("space", e) || e.code === "NumpadDecimal") {
@@ -64,7 +68,7 @@ export default function Input({
             if (value.slice(-2) === ".5" || value === "4") return;
 
             dispatch(
-              setVote({
+              addVote({
                 playerId,
                 stageId,
                 inputId,
@@ -77,17 +81,9 @@ export default function Input({
             let nextItem: RovingTabindexItem | undefined;
             if (isHotkey(["right", "tab"], e)) {
               e.preventDefault();
-              nextItem = getNextFocused(
-                items,
-                focusLocation,
-                stages[stageId].type
-              );
+              nextItem = getNextFocused(items, focusLocation, stageType);
             } else if (isHotkey("left", e)) {
-              nextItem = getPrevFocused(
-                items,
-                focusLocation,
-                stages[stageId].type
-              );
+              nextItem = getPrevFocused(items, focusLocation, stageType);
             }
             nextItem?.element.focus();
           }
