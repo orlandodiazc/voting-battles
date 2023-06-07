@@ -12,7 +12,7 @@ type Settings = {
 };
 
 type Stage = { totalPlayer: number; values: string[]; extraValues?: boolean[] };
-type Player = Stage[];
+export type Player = Stage[];
 type BoardState = { settings: Settings; scores: Player[] };
 
 const settings: Settings = {
@@ -22,7 +22,6 @@ const settings: Settings = {
     { name: "Libre 1", setup: [6], type: "MINUTE_ANS" },
     { name: "Libre 2", setup: [6], type: "MINUTE_ANS" },
     { name: "Deluxe", setup: [2, 5], type: "4X4" },
-    { name: "Results", setup: [6], type: "RESULTS" },
   ],
   players: [
     { id: 0, name: "Chuty" },
@@ -45,7 +44,7 @@ export const boardSlice = createSlice({
   name: "board",
   initialState,
   reducers: {
-    setVote: (
+    addVote: (
       state,
       action: PayloadAction<{
         playerId: number;
@@ -56,11 +55,8 @@ export const boardSlice = createSlice({
     ) => {
       const { playerId, stageId, inputId, newValue } = action.payload;
       state.scores[playerId][stageId].values[inputId] = newValue;
-      // state.scores[playerId][stageId].totalPlayer = state.scores[playerId][
-      //   stageId
-      // ].values.reduce((acc, curr) => acc + Number(curr), 0);
     },
-    setAnswer: (
+    addAnswer: (
       state,
       action: PayloadAction<{
         playerId: number;
@@ -73,16 +69,9 @@ export const boardSlice = createSlice({
         (value, idx) => (idx === checkboxId ? !value : value)
       );
       state.scores[playerId][stageId].extraValues = newExtraValues;
-      // const totalExtra =
-      //   newExtraValues?.reduce((acc, curr) => acc + (curr ? 1 : 0), 0) ?? 0;
-      // state.scores[playerId][stageId].totalPlayer =
-      //   state.scores[playerId][stageId].values.reduce(
-      //     (acc, curr) => acc + Number(curr),
-      //     0
-      //   ) + totalExtra;
     },
   },
 });
 
-export const { setVote, setAnswer } = boardSlice.actions;
+export const { addVote, addAnswer } = boardSlice.actions;
 export default boardSlice.reducer;
