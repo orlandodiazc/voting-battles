@@ -144,7 +144,8 @@ export function getNextFocused(
   type: StageType
 ): RovingTabindexItem | undefined {
   const { rowId, cellId } = location;
-
+  let locationDraft = { rowId: -1, cellId: -1 };
+  const itemsLength = orderedItems.length;
   switch (type) {
     case "MINUTE":
     case "MINUTE_ANS": {
@@ -157,18 +158,15 @@ export function getNextFocused(
       );
     }
     case "4X4": {
-      let locationDraft = { rowId: -1, cellId: -1 };
-      if (cellId >= orderedItems.length / 2 - 3) {
-        if (orderedItems.length / 2 - 1 === cellId && rowId === 0) {
-          locationDraft = { rowId: 1, cellId: location.cellId - 2 };
-        } else {
-          locationDraft = { ...location, cellId: location.cellId + 1 };
-        }
-      } else {
+      if (itemsLength / 2 - 1 === cellId && rowId === 0) {
+        locationDraft = { rowId: 1, cellId: location.cellId - 2 };
+      } else if (cellId < itemsLength / 2 - 3) {
         locationDraft =
           location.rowId === 0
             ? { ...location, rowId: 1 }
             : { rowId: 0, cellId: location.cellId + 1 };
+      } else {
+        locationDraft = { ...location, cellId: location.cellId + 1 };
       }
 
       return orderedItems.find(
@@ -178,8 +176,6 @@ export function getNextFocused(
       );
     }
     case "8X8": {
-      let locationDraft = { rowId: -1, cellId: -1 };
-
       if (cellId >= orderedItems.length / 2 - 3) {
         if (orderedItems.length / 2 - 1 === cellId && rowId === 0) {
           locationDraft = { rowId: 1, cellId: location.cellId - 2 };
@@ -194,6 +190,17 @@ export function getNextFocused(
         } else {
           locationDraft = { rowId: 0, cellId: cellId + 1 };
         }
+      }
+
+      if (itemsLength / 2 - 1 === cellId && rowId === 0) {
+        locationDraft = { rowId: 1, cellId: cellId - 2 };
+      } else if (cellId >= itemsLength / 2 - 3 || location.cellId % 2 === 0) {
+        locationDraft = { ...location, cellId: cellId + 1 };
+      } else {
+        locationDraft =
+          rowId === 0
+            ? { rowId: 1, cellId: cellId - 1 }
+            : { rowId: 0, cellId: cellId + 1 };
       }
 
       return orderedItems.find(
