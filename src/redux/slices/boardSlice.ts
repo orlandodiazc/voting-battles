@@ -9,6 +9,7 @@ type Settings = {
     type: StageType;
   }[];
   players: { id: number; name: string }[];
+  options: { isHideTotalSum: boolean; isHideTotalPlayer: boolean };
 };
 
 type Stage = { totalPlayer: number; values: string[]; extraValues?: boolean[] };
@@ -24,9 +25,10 @@ const settings: Settings = {
     { name: "Deluxe", setup: [2, 5], type: "4X4" },
   ],
   players: [
-    { id: 0, name: "Chuty" },
-    { id: 1, name: "Bnet" },
+    { id: 0, name: "MC 1" },
+    { id: 1, name: "MC 2" },
   ],
+  options: { isHideTotalSum: false, isHideTotalPlayer: false },
 };
 
 const scores: Player[] = Array(2).fill([
@@ -56,7 +58,7 @@ export const boardSlice = createSlice({
       const { playerId, stageId, inputId, newValue } = action.payload;
       state.scores[playerId][stageId].values[inputId] = newValue;
     },
-    addAnswer: (
+    toggleAnswer: (
       state,
       action: PayloadAction<{
         playerId: number;
@@ -70,8 +72,39 @@ export const boardSlice = createSlice({
       );
       state.scores[playerId][stageId].extraValues = newExtraValues;
     },
+    changePlayerName: (
+      state,
+      action: PayloadAction<{
+        playerId: number;
+        newName: string;
+      }>
+    ) => {
+      const { playerId, newName } = action.payload;
+      state.settings.players[playerId].name =
+        newName === "" ? `MC ${playerId + 1}` : newName;
+    },
+    toggleOption: (
+      state,
+      action: PayloadAction<{
+        option: "TOGGLE_STAGE_SUM" | "TOGGLE_PLAYER_TOTAL";
+      }>
+    ) => {
+      const { option } = action.payload;
+      switch (option) {
+        case "TOGGLE_PLAYER_TOTAL":
+          state.settings.options.isHideTotalPlayer =
+            !state.settings.options.isHideTotalPlayer;
+          break;
+        case "TOGGLE_STAGE_SUM":
+          state.settings.options.isHideTotalSum =
+            !state.settings.options.isHideTotalSum;
+          break;
+        default:
+      }
+    },
   },
 });
 
-export const { addVote, addAnswer } = boardSlice.actions;
+export const { addVote, toggleAnswer, changePlayerName, toggleOption } =
+  boardSlice.actions;
 export default boardSlice.reducer;
