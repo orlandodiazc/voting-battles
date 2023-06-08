@@ -3,7 +3,7 @@ import { ReactNode } from "react";
 import { Player } from "../redux/slices/boardSlice";
 
 function Cell({ children }: { children: ReactNode }) {
-  return <td className="border p-2">{children}</td>;
+  return <td className="border whitespace-nowrap p-2">{children}</td>;
 }
 
 function PlayerRow({
@@ -40,9 +40,8 @@ export default function Results() {
   const scores = useBoardSelector((state) => state.scores);
 
   return (
-    <>
-      <h2 className="-ms-2 mb-2">Resultados</h2>
-      <table className="text-sm text-center max-w-xl">
+    <div className="h-28 flex items-end">
+      <table className="text-sm text-center mx-auto">
         <thead>
           <tr>
             <th></th>
@@ -69,6 +68,6 @@ export default function Results() {
           ))}
         </tbody>
       </table>
-    </>
+    </div>
   );
 }
