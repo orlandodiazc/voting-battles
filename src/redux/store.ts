@@ -1,8 +1,9 @@
 import { configureStore } from "@reduxjs/toolkit";
+
 import boardReducer from "./slices/boardSlice";
 
 export const store = configureStore({
-  reducer: boardReducer,
+	reducer: boardReducer,
 });
 
 // Infer the `RootState` and `AppDispatch` types from the store itself

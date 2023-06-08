@@ -1,52 +1,70 @@
-import clsx from "clsx";
-import Input from "./input";
+import { twMerge } from "tailwind-merge";
+
 import { useBoardSelector } from "../hooks/hooks";
+import Input from "./ui/input";
 
 export default function Player({
-  breakValues,
-  playerId,
-  stageId,
+	setup,
+	playerId,
+	stageId,
+	name,
+	values,
+	extraValues,
+	type,
 }: {
-  breakValues: number[];
-  playerId: number;
-  stageId: number;
+	extraValues?: boolean[];
+	name: string;
+	playerId: number;
+	setup: number[];
+	stageId: number;
+	type?: "regular" | "replica";
+	values: string[];
 }) {
-  const { values, extraValues } = useBoardSelector(
-    (state) => state.scores[playerId][stageId]
-  );
-  const playerTotal =
-    values.reduce((acc, curr) => acc + Number(curr), 0) +
-    (extraValues?.reduce((acc, curr) => acc + (curr ? 1 : 0), 0) ?? 0);
-  return (
-    <>
-      {values.map((value, idx) => {
-        const padding = breakValues.some((breakIdx) => breakIdx === idx)
-          ? "border-s-14"
-          : "border-s";
+	const breakValues = setup.map((value, idx) =>
+		setup.slice(0, idx + 1).reduce((a, b) => a + b)
+	);
 
-        const maxValue = idx >= values.length - 3 ? 2 : 4;
-        return (
-          <td
-            className={clsx(padding, "text-center border-transparent")}
-            key={idx}
-          >
-            <Input
-              playerId={playerId}
-              inputId={idx}
-              stageId={stageId}
-              value={value}
-              maxValue={maxValue}
-            />
-          </td>
-        );
-      })}
-      <td className="text-center align-top">
-        <input
-          className="w-8 h-8 text-center text-background rounded disabled:bg-muted-foreground"
-          disabled={true}
-          value={playerTotal}
-        />
-      </td>
-    </>
-  );
+	const isHideTotalSum = useBoardSelector(
+		(state) => state.settings.options.isHideTotalSum
+	);
+
+	const playerTotal =
+		values.reduce((acc, curr) => acc + Number(curr), 0) +
+		(extraValues?.reduce((acc, curr) => acc + (curr ? 1 : 0), 0) ?? 0);
+
+	return (
+		<tr className="[&>*:nth-last-child(-n+4)]:px-1.5" key={playerId}>
+			<td className="align-middle pe-2 max-w-[10ch] font-mono text-right text-sm text-ellipsis overflow-hidden whitespace-nowrap">
+				{name}
+			</td>
+			{values.map((value, idx) => {
+				const padding = breakValues.some((breakIdx) => breakIdx === idx)
+					? "border-s-14"
+					: "border-s";
+				const maxValue = idx >= values.length - 3 ? 2 : 4;
+				return (
+					<td
+						className={twMerge(padding, "text-center border-transparent")}
+						key={idx}
+					>
+						<Input
+							playerId={playerId}
+							inputId={idx}
+							stageId={stageId}
+							value={value}
+							maxValue={maxValue}
+							type={type}
+						/>
+					</td>
+				);
+			})}
+			<td className="text-center align-top">
+				<input
+					className="w-8 h-8 text-center text-background rounded disabled:bg-popover-foreground"
+					disabled={true}
+					value={isHideTotalSum ? "-" : playerTotal}
+				/>
+			</td>
+		</tr>
+	);
 }
