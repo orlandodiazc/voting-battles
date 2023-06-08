@@ -14,6 +14,9 @@ export default function Player({
   const { values, extraValues } = useBoardSelector(
     (state) => state.scores[playerId][stageId]
   );
+  const isHideTotalSum = useBoardSelector(
+    (state) => state.settings.options.isHideTotalSum
+  );
   const playerTotal =
     values.reduce((acc, curr) => acc + Number(curr), 0) +
     (extraValues?.reduce((acc, curr) => acc + (curr ? 1 : 0), 0) ?? 0);
@@ -44,7 +47,7 @@ export default function Player({
         <input
           className="w-8 h-8 text-center text-background rounded disabled:bg-muted-foreground"
           disabled={true}
-          value={playerTotal}
+          value={isHideTotalSum ? "-" : playerTotal}
         />
       </td>
     </>
