@@ -49,8 +49,8 @@ export default function Input({
     <input
       type="number"
       className="w-8 h-8 text-center bg-foreground text-background rounded"
-      value={value}
       step="0.5"
+      value={value}
       onChange={handleChange}
       {...getRovingProps<"input">({
         onKeyDown: (e) => {
