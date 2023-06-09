@@ -31,7 +31,7 @@ export default function Input({
 	const { getOrderedItems, getRovingProps } = useRovingTabindex(focusLocation);
 
 	const stageType = useBoardSelector(
-		(state) => state.settings.stages.normal[stageId].type
+		(state) => state.settings.stages.regular[stageId].type
 	);
 
 	const dispatch = useBoardDispatch();
