@@ -6,9 +6,12 @@ import Board from "./components/board";
 import PlayerSums from "./components/player-sums";
 import Replica from "./components/replica";
 import Results from "./components/results";
+import { RovingTabindexRoot } from "./components/roving-tabindex";
 import Settings from "./components/settings";
+import { Button } from "./components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "./components/ui/tabs";
-import { useBoardSelector } from "./hooks/hooks";
+import { useBoardDispatch, useBoardSelector } from "./hooks/hooks";
+import { addReplica } from "./redux/slices/boardSlice";
 
 type ReplicaT = { element: JSX.Element; triggerValue: string };
 
@@ -19,7 +22,7 @@ export default function App() {
 	const [value, setValue] = useState("Incremental");
 	const [replicas, setReplicas] = useState<ReplicaT[]>([]);
 	const tabListRef = useRef<HTMLDivElement | null>(null);
-
+	const dispatch = useBoardDispatch();
 	const getTriggers = useCallback((): HTMLElement[] => {
 		if (!tabListRef.current) return [];
 		return Array.from(
@@ -42,6 +45,15 @@ export default function App() {
 		setValue(newValue);
 	}
 
+	function newReplica() {
+		dispatch(addReplica());
+		setReplicas(
+			replicas.concat({
+				triggerValue: `Replica ${replicas.length + 1}`,
+				element: <Replica replicaId={replicas.length} />,
+			})
+		);
+	}
 	return (
 		<main className="min-h-screen max-w-xl mx-auto">
 			<Tabs value={value} onValueChange={(value) => setValue(value)} asChild>
@@ -53,7 +65,7 @@ export default function App() {
 						<TabsList ref={tabListRef} tabIndex={-1}>
 							{stageNames.map((name, idx) => (
 								<TabsTrigger value={name} key={idx}>
-									{name}
+									{idx}
 								</TabsTrigger>
 							))}
 							<TabsTrigger value="Results" className="text-yellow-600">
@@ -69,26 +81,22 @@ export default function App() {
 							<MdChevronRight size={26} />
 						</button>
 					</div>
-					<div className="flex flex-col h-[150px] justify-center w-[560px]">
+					<RovingTabindexRoot active={{ rowId: 0, cellId: 0 }} as={"div"}>
 						<Board />
 						<TabsContent value="Results">
-							<Results
-								newReplica={() => {
-									setReplicas(
-										replicas.concat({
-											triggerValue: `Replica ${replicas.length + 1}`,
-											element: <Replica />,
-										})
-									);
-								}}
-							/>
+							<Results />
 						</TabsContent>
-						{replicas.map(({ element, triggerValue }, idx) => (
-							<TabsContent value={triggerValue} key={idx}>
-								{element}
-							</TabsContent>
-						))}
+						{replicas.map(({ element, triggerValue }, idx) => {
+							return (
+								<TabsContent value={triggerValue} key={idx}>
+									{element}
+								</TabsContent>
+							);
+						})}
+					</RovingTabindexRoot>
+					<div className="flex justify-center">
 						<PlayerSums tabValue={value} />
+						<Button onClick={newReplica}>+ Replica</Button>
 					</div>
 				</section>
 			</Tabs>

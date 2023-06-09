@@ -1,5 +1,5 @@
 import type { PayloadAction } from "@reduxjs/toolkit";
-import { createSlice } from "@reduxjs/toolkit";
+import { createSlice, current } from "@reduxjs/toolkit";
 
 export type StageType = "MINUTE" | "MINUTE_ANS" | "8X8" | "4X4" | "RESULTS";
 type Settings = {
@@ -20,9 +20,9 @@ type Stage = {
 	values: string[];
 };
 export type RegularPlayer = Stage[];
-
+type ReplicaStage = { values: string[] };
 type BoardState = {
-	scores: { regular: RegularPlayer[]; replicas: { values: string[] }[][] };
+	scores: { regular: RegularPlayer[]; replicas: ReplicaStage[][] };
 	settings: Settings;
 };
 
@@ -53,9 +53,11 @@ const regularScores: RegularPlayer[] = Array<RegularPlayer>(2).fill(
 		};
 	})
 );
-const scores = { regular: regularScores, replicas: Array(2).fill([]) };
+const scores = {
+	regular: regularScores,
+	replicas: [[], []],
+};
 const initialState: BoardState = { settings, scores };
-
 export const boardSlice = createSlice({
 	name: "board",
 	initialState,
@@ -67,10 +69,15 @@ export const boardSlice = createSlice({
 				newValue: string;
 				playerId: number;
 				stageId: number;
+				type?: string;
 			}>
 		) => {
 			const { playerId, stageId, inputId, newValue } = action.payload;
-			state.scores.regular[playerId][stageId].values[inputId] = newValue;
+			if (action.payload.type !== "replica") {
+				state.scores.regular[playerId][stageId].values[inputId] = newValue;
+			} else {
+				state.scores.replicas[playerId][stageId].values[inputId] = newValue;
+			}
 		},
 		toggleAnswer: (
 			state,
@@ -116,9 +123,23 @@ export const boardSlice = createSlice({
 				default:
 			}
 		},
+		addReplica: (state) => {
+			const valueLength = state.settings.stages.replica.setup.reduce(
+				(acc, curr) => acc + curr,
+				0
+			);
+			const array = Array<string>(valueLength + 3).fill("");
+			state.scores.replicas[0].push({ values: array });
+			state.scores.replicas[1].push({ values: array });
+		},
 	},
 });
 
-export const { addVote, toggleAnswer, changePlayerName, toggleOption } =
-	boardSlice.actions;
+export const {
+	addVote,
+	toggleAnswer,
+	changePlayerName,
+	addReplica,
+	toggleOption,
+} = boardSlice.actions;
 export default boardSlice.reducer;

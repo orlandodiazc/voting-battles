@@ -8,19 +8,22 @@ export default function Player({
 	playerId,
 	stageId,
 	name,
+	values,
+	extraValues,
+	type,
 }: {
+	extraValues?: boolean[];
 	name: string;
 	playerId: number;
 	setup: number[];
 	stageId: number;
+	type?: string;
+	values: string[];
 }) {
 	const breakValues = setup.map((value, idx) =>
 		setup.slice(0, idx + 1).reduce((a, b) => a + b)
 	);
 
-	const { values, extraValues } = useBoardSelector(
-		(state) => state.scores.regular[playerId][stageId]
-	);
 	const isHideTotalSum = useBoardSelector(
 		(state) => state.settings.options.isHideTotalSum
 	);
@@ -37,7 +40,6 @@ export default function Player({
 				const padding = breakValues.some((breakIdx) => breakIdx === idx)
 					? "border-s-14"
 					: "border-s";
-
 				const maxValue = idx >= values.length - 3 ? 2 : 4;
 				return (
 					<td
@@ -50,6 +52,7 @@ export default function Player({
 							stageId={stageId}
 							value={value}
 							maxValue={maxValue}
+							type={type}
 						/>
 					</td>
 				);

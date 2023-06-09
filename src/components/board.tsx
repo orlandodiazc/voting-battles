@@ -4,12 +4,11 @@ import React from "react";
 import { useBoardSelector } from "../hooks/hooks";
 import AnswerInputs from "./answer-input-list";
 import Player from "./player";
-import { RovingTabindexRoot } from "./roving-tabindex";
-import Table from "./ui/vote-table";
+import TableBody from "./ui/vote-table";
 
 export default function Board() {
 	const { stages, players } = useBoardSelector((state) => state.settings);
-
+	const scores = useBoardSelector((state) => state.scores.regular);
 	return (
 		<>
 			{stages.regular.map(({ name, setup, type }, stageIdx) => {
@@ -22,14 +21,17 @@ export default function Board() {
 						key={stageIdx}
 						className="flex justify-center items-end"
 					>
-						<Table setup={setup}>
-							<RovingTabindexRoot as="tbody" active={{ rowId: 0, cellId: 0 }}>
-								{draftPlayers.map(({ id: playerId, name }) => (
+						<TableBody setup={setup}>
+							{draftPlayers.map(({ id: playerId, name }) => {
+								const { values, extraValues } = scores[playerId][stageIdx];
+								return (
 									<React.Fragment key={playerId}>
 										<Player
 											playerId={playerId}
 											stageId={stageIdx}
 											setup={setup}
+											values={values}
+											extraValues={extraValues}
 											name={name}
 										/>
 										{type === "MINUTE_ANS" &&
@@ -37,9 +39,9 @@ export default function Board() {
 												<AnswerInputs playerId={playerId} stageIdx={stageIdx} />
 											)}
 									</React.Fragment>
-								))}
-							</RovingTabindexRoot>
-						</Table>
+								);
+							})}
+						</TableBody>
 					</TabsContent>
 				);
 			})}

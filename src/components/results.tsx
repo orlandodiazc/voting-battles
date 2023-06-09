@@ -2,7 +2,6 @@ import { ReactNode } from "react";
 
 import { useBoardSelector } from "../hooks/hooks";
 import { RegularPlayer } from "../redux/slices/boardSlice";
-import { Button } from "./ui/button";
 
 function Cell({ children }: { children: ReactNode }) {
 	return <td className="border whitespace-nowrap p-1">{children}</td>;
@@ -34,7 +33,7 @@ function PlayerRow({
 	);
 }
 
-export default function Results({ newReplica }: { newReplica: () => void }) {
+export default function Results() {
 	const stageNames = useBoardSelector((state) =>
 		state.settings.stages.regular.map((stage) => stage.name)
 	);
@@ -70,7 +69,6 @@ export default function Results({ newReplica }: { newReplica: () => void }) {
 					))}
 				</tbody>
 			</table>
-			<Button onClick={newReplica}>+ Replica</Button>
 		</div>
 	);
 }

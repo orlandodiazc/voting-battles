@@ -1,6 +1,6 @@
 import { ReactNode } from "react";
 
-export default function Table({
+export default function TableBody({
 	setup,
 	children,
 }: {
@@ -8,7 +8,7 @@ export default function Table({
 	setup: number[];
 }) {
 	return (
-		<div className="h-[113px]">
+		<div className="h-[120px]">
 			<table className="border-separate border-spacing-px mx-auto">
 				<thead>
 					<tr className="text-[10px] text-center">
@@ -19,7 +19,7 @@ export default function Table({
 						<th>Total</th>
 					</tr>
 				</thead>
-				{children}
+				<tbody>{children}</tbody>
 			</table>
 		</div>
 	);
