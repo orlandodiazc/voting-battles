@@ -1,25 +1,26 @@
 import isHotkey from "is-hotkey";
 import {
+  ComponentPropsWithoutRef,
   createContext,
+  ElementType,
+  FocusEvent,
+  KeyboardEvent,
+  MouseEvent,
+  MutableRefObject,
   ReactNode,
   useCallback,
   useContext,
   useRef,
   useState,
-  FocusEvent,
-  MouseEvent,
-  KeyboardEvent,
-  ComponentPropsWithoutRef,
-  ElementType,
-  MutableRefObject,
 } from "react";
+
 import { StageType } from "../redux/slices/boardSlice";
 
-type Location = { rowId: number; cellId: number };
+type Location = { cellId: number, rowId: number; };
 
 export type RovingTabindexItem = {
-  location: Location;
   element: HTMLElement;
+  location: Location;
 };
 
 function focusFirst(candidates: HTMLElement[]) {
@@ -31,10 +32,10 @@ function focusFirst(candidates: HTMLElement[]) {
 
 type RovingTabindexContext = {
   currentRovingTabindexValue: Location | null;
-  setFocusableId: (location: Location) => void;
-  onShiftTab: () => void;
-  getOrderedItems: () => RovingTabindexItem[];
   elements: MutableRefObject<Map<Location, HTMLElement>>;
+  getOrderedItems: () => RovingTabindexItem[];
+  onShiftTab: () => void;
+  setFocusableId: (location: Location) => void;
 };
 
 const RovingTabindexContext = createContext<RovingTabindexContext>({
@@ -50,9 +51,9 @@ const ROOT_SELECTOR = "data-roving-tabindex-root";
 export const NOT_FOCUSABLE_SELECTOR = "data-roving-tabindex-not-focusable";
 
 type RovingTabindexRootBaseProps<T> = {
-  children: ReactNode | ReactNode[];
   active: Location | null;
   as?: T;
+  children: ReactNode | ReactNode[];
 };
 
 type RovingTabindexRootProps<T extends ElementType> =
