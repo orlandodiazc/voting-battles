@@ -6,33 +6,36 @@ type Settings = {
 	options: { isHideTotalPlayer: boolean; isHideTotalSum: boolean };
 	players: { id: number; name: string }[];
 	stages: {
-		normal: {
+		regular: {
 			name: string;
 			setup: number[];
 			type: StageType;
 		}[];
-		replicaFormat: { setup: number[]; type: StageType };
+		replica: { setup: number[]; type: StageType };
 	};
 };
 
 type Stage = {
 	extraValues?: boolean[];
-	replicas: string[][];
-	totalPlayer: number;
 	values: string[];
 };
-export type Player = Stage[];
-type BoardState = { scores: Player[]; settings: Settings };
+export type RegularPlayer = Stage[];
+
+type BoardState = {
+	scores: { regular: RegularPlayer[]; replicas: { values: string[] }[][] };
+	settings: Settings;
+};
+
 const settings: Settings = {
 	stages: {
-		normal: [
+		regular: [
 			{ name: "Incremental", setup: [6], type: "MINUTE" },
 			{ name: "Random", setup: [6], type: "8X8" },
 			{ name: "Libre 1", setup: [6], type: "MINUTE_ANS" },
 			{ name: "Libre 2", setup: [6], type: "MINUTE_ANS" },
 			{ name: "Deluxe", setup: [2, 5], type: "4X4" },
 		],
-		replicaFormat: { setup: [5], type: "4X4" },
+		replica: { setup: [5], type: "4X4" },
 	},
 	players: [
 		{ id: 0, name: "MC 1" },
@@ -41,18 +44,18 @@ const settings: Settings = {
 	options: { isHideTotalSum: false, isHideTotalPlayer: false },
 };
 
-const scores: Player[] = Array<Player>(2).fill(
-	settings.stages.normal.map(({ setup, type }): Stage => {
+const regularScores: RegularPlayer[] = Array<RegularPlayer>(2).fill(
+	settings.stages.regular.map(({ setup, type }): Stage => {
 		const length = setup.reduce((acc, curr) => acc + curr, 0);
 		return {
 			values: Array<string>(length + 3).fill(""),
-			replicas: [Array<string>(8).fill("")],
 			...(type === "MINUTE_ANS" && { extraValues: Array(length).fill(false) }),
-			totalPlayer: 0,
 		};
 	})
 );
+const scores = { regular: regularScores, replicas: Array(2).fill([]) };
 const initialState: BoardState = { settings, scores };
+
 export const boardSlice = createSlice({
 	name: "board",
 	initialState,
@@ -67,7 +70,7 @@ export const boardSlice = createSlice({
 			}>
 		) => {
 			const { playerId, stageId, inputId, newValue } = action.payload;
-			state.scores[playerId][stageId].values[inputId] = newValue;
+			state.scores.regular[playerId][stageId].values[inputId] = newValue;
 		},
 		toggleAnswer: (
 			state,
@@ -78,10 +81,10 @@ export const boardSlice = createSlice({
 			}>
 		) => {
 			const { playerId, stageId, checkboxId } = action.payload;
-			const newExtraValues = state.scores[playerId][stageId].extraValues?.map(
-				(value, idx) => (idx === checkboxId ? !value : value)
-			);
-			state.scores[playerId][stageId].extraValues = newExtraValues;
+			const newExtraValues = state.scores.regular[playerId][
+				stageId
+			].extraValues?.map((value, idx) => (idx === checkboxId ? !value : value));
+			state.scores.regular[playerId][stageId].extraValues = newExtraValues;
 		},
 		changePlayerName: (
 			state,
