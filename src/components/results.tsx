@@ -1,7 +1,7 @@
 import { ReactNode } from "react";
 
 import { useBoardSelector } from "../hooks/hooks";
-import { Player } from "../redux/slices/boardSlice";
+import { RegularPlayer } from "../redux/slices/boardSlice";
 import { Button } from "./ui/button";
 
 function Cell({ children }: { children: ReactNode }) {
@@ -13,7 +13,7 @@ function PlayerRow({
 	playerName,
 }: {
 	playerName: string;
-	playerScores: Player;
+	playerScores: RegularPlayer;
 }) {
 	const stageScores = playerScores.map(
 		({ values, extraValues }) =>
@@ -34,9 +34,9 @@ function PlayerRow({
 	);
 }
 
-export default function Results() {
+export default function Results({ newReplica }: { newReplica: () => void }) {
 	const stageNames = useBoardSelector((state) =>
-		state.settings.stages.normal.map((stage) => stage.name)
+		state.settings.stages.regular.map((stage) => stage.name)
 	);
 	const playerNames = useBoardSelector((state) => state.settings.players);
 	const scores = useBoardSelector((state) => state.scores);
@@ -61,7 +61,7 @@ export default function Results() {
 					</tr>
 				</thead>
 				<tbody>
-					{scores.map((player, idx) => (
+					{scores.regular.map((player, idx) => (
 						<PlayerRow
 							key={idx}
 							playerScores={player}
@@ -70,7 +70,7 @@ export default function Results() {
 					))}
 				</tbody>
 			</table>
-			<Button>+ Replica</Button>
+			<Button onClick={newReplica}>+ Replica</Button>
 		</div>
 	);
 }

@@ -9,7 +9,7 @@ export const useBoardSelector: TypedUseSelectorHook<RootState> = useSelector;
 
 export function usePlayersTotal() {
 	const scores = useBoardSelector((state) => state.scores);
-	const playerScores = scores.map((player) =>
+	const playerScores = scores.regular.map((player) =>
 		player.reduce(
 			(acc, { values, extraValues }) =>
 				acc +
