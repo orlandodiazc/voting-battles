@@ -1,4 +1,4 @@
-const { fontFamily } = require("tailwindcss/defaultTheme");
+import { fontFamily } from "tailwindcss/defaultTheme";
 
 /** @type {import('tailwindcss').Config} */
 export default {
@@ -76,5 +76,5 @@ export default {
 			},
 		},
 	},
-	plugins: [require("tailwindcss-animate")],
+	plugins: ["tailwindcss-animate"],
 };
