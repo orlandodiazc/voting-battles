@@ -8,8 +8,8 @@ export default function Replica({ replicaId }: { replicaId: number }) {
 	const scores = useBoardSelector((state) => state.scores.replicas);
 	const draftPlayers = replicaId % 2 === 0 ? players : [...players].reverse();
 	return (
-		<>
-			<TableBody setup={setup}>
+		<div className="flex items-end justify-center">
+			<TableBody setup={setup} stageName={`Replica ${replicaId + 1}`}>
 				{draftPlayers.map(({ name, id }) => {
 					return (
 						<Player
@@ -24,6 +24,6 @@ export default function Replica({ replicaId }: { replicaId: number }) {
 					);
 				})}
 			</TableBody>
-		</>
+		</div>
 	);
 }
