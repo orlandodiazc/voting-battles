@@ -5,17 +5,18 @@ import { useBoardSelector, usePlayersTotal } from "../hooks/hooks";
 export default function PlayerSums({ tabValue }: { tabValue: string }) {
 	const playerScores = usePlayersTotal();
 	const players = useBoardSelector((state) => state.settings.players);
+	const isPlayerTotalHidden = useBoardSelector(
+		(state) => state.settings.options.isHideTotalPlayer
+	);
 	const regularStages = useBoardSelector(
 		(state) => state.settings.stages.regular
 	);
-	const isPlayerSumsHidden = !regularStages.some(
-		({ name }) => name === tabValue
-	);
+	const isRegularStage = regularStages.some(({ name }) => name === tabValue);
 	return (
 		<div
 			className={twMerge(
-				"flex justify-center gap-3 text-sm bg-muted self-center px-3 py-2 leading-none rounded",
-				isPlayerSumsHidden && "hidden"
+				"flex justify-center items-center h-full gap-3 text-xs bg-muted self-center px-3 py-2 leading-none rounded-t-sm",
+				(isPlayerTotalHidden || !isRegularStage) && "hidden"
 			)}
 		>
 			<span>TOTAL</span>
