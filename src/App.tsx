@@ -1,12 +1,12 @@
 import { TabsContent } from "@radix-ui/react-tabs";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { MdChevronLeft, MdChevronRight } from "react-icons/md";
+import { twMerge } from "tailwind-merge";
 
 import Board from "./components/board";
 import PlayerSums from "./components/player-sums";
 import Replica from "./components/replica";
 import Results from "./components/results";
-import { RovingTabindexRoot } from "./components/roving-tabindex";
 import Settings from "./components/settings";
 import { Button } from "./components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "./components/ui/tabs";
@@ -19,10 +19,13 @@ export default function App() {
 	const stageNames = useBoardSelector((state) =>
 		state.settings.stages.regular.map((stage) => stage.name)
 	);
-	const [value, setValue] = useState("Incremental");
+	const [value, setValue] = useState(stageNames[0]);
+
 	const [replicas, setReplicas] = useState<ReplicaT[]>([]);
-	const tabListRef = useRef<HTMLDivElement | null>(null);
 	const dispatch = useBoardDispatch();
+
+	const tabListRef = useRef<HTMLDivElement | null>(null);
+
 	const getTriggers = useCallback((): HTMLElement[] => {
 		if (!tabListRef.current) return [];
 		return Array.from(
@@ -35,6 +38,17 @@ export default function App() {
 		setValue(replicas[replicas.length - 1].triggerValue);
 	}, [replicas]);
 
+	function newReplica() {
+		if (replicas.length >= 3) return;
+		dispatch(addReplica());
+		setReplicas(
+			replicas.concat({
+				triggerValue: `Replica ${replicas.length + 1}`,
+				element: <Replica replicaId={replicas.length} />,
+			})
+		);
+	}
+
 	function handleClick(direction: "LEFT" | "RIGHT") {
 		const domTriggers = getTriggers();
 		const currIndex = domTriggers.findIndex((el) => el.dataset.value === value);
@@ -45,26 +59,46 @@ export default function App() {
 		setValue(newValue);
 	}
 
-	function newReplica() {
-		dispatch(addReplica());
-		setReplicas(
-			replicas.concat({
-				triggerValue: `Replica ${replicas.length + 1}`,
-				element: <Replica replicaId={replicas.length} />,
-			})
-		);
-	}
 	return (
 		<main className="min-h-screen max-w-xl mx-auto">
 			<Tabs value={value} onValueChange={(value) => setValue(value)} asChild>
-				<section className="overflow-x-auto">
-					<div className="flex justify-between bg-muted px-2">
+				<section className="flex flex-col">
+					<div className="overflow-x-auto pt-5">
+						<Board />
+						<TabsContent value="Results">
+							<Results />
+						</TabsContent>
+						{replicas.map(({ element, triggerValue }, idx) => {
+							return (
+								<TabsContent value={triggerValue} key={idx}>
+									{element}
+								</TabsContent>
+							);
+						})}
+					</div>
+					<div className="h-8 flex justify-center items-center mb-4">
+						<PlayerSums tabValue={value} />
+						<span
+							className={twMerge(
+								stageNames.some((stage) => stage === value) && "hidden"
+							)}
+						>
+							<Button onClick={newReplica} disabled={replicas.length === 3}>
+								+ Replica
+							</Button>
+						</span>
+					</div>
+					<div className="flex justify-between bg-muted px-2 overflow-x-auto border-b-2">
 						<button onClick={() => handleClick("LEFT")} tabIndex={-1}>
 							<MdChevronLeft size={26} />
 						</button>
 						<TabsList ref={tabListRef} tabIndex={-1}>
 							{stageNames.map((name, idx) => (
-								<TabsTrigger value={name} key={idx}>
+								<TabsTrigger
+									value={name}
+									key={idx}
+									className="aspect-square w-8"
+								>
 									{idx}
 								</TabsTrigger>
 							))}
@@ -80,23 +114,6 @@ export default function App() {
 						<button onClick={() => handleClick("RIGHT")} tabIndex={-1}>
 							<MdChevronRight size={26} />
 						</button>
-					</div>
-					<RovingTabindexRoot active={{ rowId: 0, cellId: 0 }} as={"div"}>
-						<Board />
-						<TabsContent value="Results">
-							<Results />
-						</TabsContent>
-						{replicas.map(({ element, triggerValue }, idx) => {
-							return (
-								<TabsContent value={triggerValue} key={idx}>
-									{element}
-								</TabsContent>
-							);
-						})}
-					</RovingTabindexRoot>
-					<div className="flex justify-center">
-						<PlayerSums tabValue={value} />
-						<Button onClick={newReplica}>+ Replica</Button>
 					</div>
 				</section>
 			</Tabs>
