@@ -1,14 +1,21 @@
 import { ReactNode } from "react";
 
+import { RovingTabindexRoot } from "../roving-tabindex";
+
 export default function TableBody({
 	setup,
 	children,
+	stageName,
 }: {
 	children: ReactNode;
 	setup: number[];
+	stageName: string;
 }) {
 	return (
-		<div className="h-[120px]">
+		<div className="h-[115px] relative">
+			<h2 className="text-sm text-destructive absolute -left-4 -top-3">
+				{stageName}
+			</h2>
 			<table className="border-separate border-spacing-px mx-auto">
 				<thead>
 					<tr className="text-[10px] text-center">
@@ -19,7 +26,9 @@ export default function TableBody({
 						<th>Total</th>
 					</tr>
 				</thead>
-				<tbody>{children}</tbody>
+				<RovingTabindexRoot as="tbody" active={{ rowId: 0, cellId: 0 }}>
+					{children}
+				</RovingTabindexRoot>
 			</table>
 		</div>
 	);

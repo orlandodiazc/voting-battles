@@ -21,7 +21,7 @@ export default function Board() {
 						key={stageIdx}
 						className="flex justify-center items-end"
 					>
-						<TableBody setup={setup}>
+						<TableBody setup={setup} stageName={name}>
 							{draftPlayers.map(({ id: playerId, name }) => {
 								const { values, extraValues } = scores[playerId][stageIdx];
 								return (
