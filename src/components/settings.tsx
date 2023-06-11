@@ -5,7 +5,7 @@ export default function Settings() {
 	const playersName = useBoardSelector((state) => state.settings.players);
 	const dispatch = useBoardDispatch();
 	return (
-		<div className="flex gap-2 items-start bg-muted p-2 text-sm">
+		<div className="flex gap-2 items-start bg-muted p-2 text-sm flex-wrap">
 			<div className="grid gap-2">
 				{playersName.map(({ name, id: playerId }) => (
 					<div key={playerId} className="text-background">
