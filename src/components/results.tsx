@@ -4,7 +4,7 @@ import { useBoardSelector } from "../hooks/hooks";
 import { RegularPlayer } from "../redux/slices/boardSlice";
 
 function Cell({ children }: { children: ReactNode }) {
-	return <td className="border whitespace-nowrap p-1">{children}</td>;
+	return <td className="border whitespace-nowrap p-1 text-sm">{children}</td>;
 }
 
 function PlayerRow({
@@ -41,20 +41,23 @@ export default function Results() {
 	const scores = useBoardSelector((state) => state.scores);
 
 	return (
-		<div className="flex flex-col gap-2 items-center">
-			<table className="text-sm text-center mx-auto mt-1">
+		<div className="flex justify-center items-center relative h-[115px]">
+			<h2 className="absolute text-sm text-destructive -top-2 left-8">
+				Resultados
+			</h2>
+			<table className="text-sm text-center mx-auto mt-3">
 				<thead>
 					<tr>
 						<th></th>
 						{stageNames.map((name, idx) => (
 							<th
 								key={idx}
-								className="bg-muted border px-2 py-1 whitespace-nowrap"
+								className="bg-muted border text-xs px-2 py-1 whitespace-nowrap"
 							>
 								{name}
 							</th>
 						))}
-						<th className="bg-muted border px-2 py-1 whitespace-nowrap">
+						<th className="bg-muted border text-xs px-2 py-1 whitespace-nowrap">
 							Total
 						</th>
 					</tr>
