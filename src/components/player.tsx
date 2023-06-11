@@ -1,7 +1,7 @@
 import { twMerge } from "tailwind-merge";
 
 import { useBoardSelector } from "../hooks/hooks";
-import Input from "./input";
+import Input from "./ui/input";
 
 export default function Player({
 	setup,
@@ -17,7 +17,7 @@ export default function Player({
 	playerId: number;
 	setup: number[];
 	stageId: number;
-	type?: string;
+	type?: "replica";
 	values: string[];
 }) {
 	const breakValues = setup.map((value, idx) =>
@@ -31,6 +31,7 @@ export default function Player({
 	const playerTotal =
 		values.reduce((acc, curr) => acc + Number(curr), 0) +
 		(extraValues?.reduce((acc, curr) => acc + (curr ? 1 : 0), 0) ?? 0);
+
 	return (
 		<tr className="[&>*:nth-last-child(-n+4)]:px-1.5" key={playerId}>
 			<td className="align-middle pe-2 max-w-[10ch] font-mono text-right text-sm text-ellipsis overflow-hidden whitespace-nowrap">
