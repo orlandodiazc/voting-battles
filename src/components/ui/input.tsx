@@ -2,13 +2,13 @@ import isHotkey from "is-hotkey";
 import { ChangeEvent } from "react";
 
 import { useBoardDispatch, useBoardSelector } from "../../hooks/hooks";
-import { addVote } from "../../redux/slices/boardSlice";
+import { addVote, StageType } from "../../redux/slices/boardSlice";
 import {
 	getNextFocused,
 	getPrevFocused,
 	RovingTabindexItem,
 	useRovingTabindex,
-} from "../roving-tabindex";
+} from "../roving";
 
 export default function Input({
 	inputId,
@@ -22,19 +22,39 @@ export default function Input({
 	maxValue: number;
 	playerId: number;
 	stageId: number;
-	type?: "replica";
+	type?: "regular" | "replica";
 	value: string;
 }) {
-	const focusLocation = {
-		rowId: stageId % 2 === 0 ? playerId : playerId === 0 ? 1 : 0,
-		cellId: inputId,
-	};
-	const { getOrderedItems, getRovingProps } = useRovingTabindex(focusLocation);
-
-	const stageType = useBoardSelector(
-		(state) => state.settings.stages.regular[stageId].type
+	const regularLength = useBoardSelector(
+		(state) => state.settings.stages.regular.length
+	);
+	const isSwitchOrder = useBoardSelector(
+		(state) => state.settings.options.isSwitchReplicaPlayers
 	);
 
+	let focusLocation = { rowId: -1, cellId: -1 };
+	if (type === "regular") {
+		focusLocation = {
+			rowId: stageId % 2 === 0 ? playerId : playerId === 0 ? 1 : 0,
+			cellId: inputId,
+		};
+	} else if (type === "replica") {
+		focusLocation = {
+			rowId:
+				(regularLength + stageId) % 2 === (isSwitchOrder ? 1 : 0)
+					? playerId
+					: playerId === 0
+					? 1
+					: 0,
+			cellId: inputId,
+		};
+	}
+	const { getOrderedItems, getRovingProps } = useRovingTabindex(focusLocation);
+
+	const regularStageType = useBoardSelector(
+		(state) => state.settings.stages.regular[stageId].type
+	);
+	const stageType: StageType = type === "replica" ? "4X4" : regularStageType;
 	const dispatch = useBoardDispatch();
 
 	function handleChange(e: ChangeEvent<HTMLInputElement>) {
@@ -52,7 +72,7 @@ export default function Input({
 	return (
 		<input
 			type="number"
-			className="w-8 h-8 text-center bg-foreground text-background rounded jackass"
+			className="w-8 h-8 text-center bg-foreground text-background rounded"
 			step="0.5"
 			value={value}
 			onChange={handleChange}

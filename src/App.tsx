@@ -44,7 +44,12 @@ export default function App() {
 		setReplicas(
 			replicas.concat({
 				triggerValue: `Replica ${replicas.length + 1}`,
-				element: <Replica replicaId={replicas.length} />,
+				element: (
+					<Replica
+						replicaId={replicas.length}
+						regularLength={stageNames.length}
+					/>
+				),
 			})
 		);
 	}
@@ -62,7 +67,7 @@ export default function App() {
 	return (
 		<main className="min-h-screen max-w-xl mx-auto">
 			<Tabs value={value} onValueChange={(value) => setValue(value)} asChild>
-				<section className="flex flex-col">
+				<section className="flex flex-col relative">
 					<div className="overflow-x-auto pt-5">
 						<Board />
 						<TabsContent value="Results">
@@ -76,7 +81,7 @@ export default function App() {
 							);
 						})}
 					</div>
-					<div className="h-8 flex justify-center items-center mb-4">
+					<div className="h-8 flex justify-center items-center mb-2">
 						<PlayerSums tabValue={value} />
 						<span
 							className={twMerge(
@@ -99,10 +104,13 @@ export default function App() {
 									key={idx}
 									className="aspect-square w-8"
 								>
-									{idx}
+									{idx + 1}
 								</TabsTrigger>
 							))}
-							<TabsTrigger value="Results" className="text-yellow-600">
+							<TabsTrigger
+								value="Results"
+								className="text-yellow-600 aspect-square w-8"
+							>
 								R
 							</TabsTrigger>
 							{replicas.map(({ triggerValue }, idx) => (

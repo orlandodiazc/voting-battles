@@ -3,7 +3,11 @@ import { createSlice } from "@reduxjs/toolkit";
 
 export type StageType = "MINUTE" | "MINUTE_ANS" | "8X8" | "4X4" | "RESULTS";
 type Settings = {
-	options: { isHideTotalPlayer: boolean; isHideTotalSum: boolean };
+	options: {
+		isHideTotalPlayer: boolean;
+		isHideTotalSum: boolean;
+		isSwitchReplicaPlayers: boolean;
+	};
 	players: { id: number; name: string }[];
 	stages: {
 		regular: {
@@ -41,7 +45,11 @@ const settings: Settings = {
 		{ id: 0, name: "MC 1" },
 		{ id: 1, name: "MC 2" },
 	],
-	options: { isHideTotalSum: false, isHideTotalPlayer: false },
+	options: {
+		isHideTotalSum: false,
+		isHideTotalPlayer: false,
+		isSwitchReplicaPlayers: false,
+	},
 };
 
 const regularScores: RegularPlayer[] = Array<RegularPlayer>(2).fill(
@@ -73,9 +81,9 @@ export const boardSlice = createSlice({
 			}>
 		) => {
 			const { playerId, stageId, inputId, newValue } = action.payload;
-			if (action.payload.type !== "replica") {
+			if (action.payload.type === "regular") {
 				state.scores.regular[playerId][stageId].values[inputId] = newValue;
-			} else {
+			} else if (action.payload.type === "replica") {
 				state.scores.replicas[playerId][stageId].values[inputId] = newValue;
 			}
 		},
@@ -107,7 +115,10 @@ export const boardSlice = createSlice({
 		toggleOption: (
 			state,
 			action: PayloadAction<{
-				option: "TOGGLE_STAGE_SUM" | "TOGGLE_PLAYER_TOTAL";
+				option:
+					| "TOGGLE_STAGE_SUM"
+					| "TOGGLE_PLAYER_TOTAL"
+					| "TOGGLE_REPLICA_ORDER";
 			}>
 		) => {
 			const { option } = action.payload;
@@ -119,6 +130,10 @@ export const boardSlice = createSlice({
 				case "TOGGLE_STAGE_SUM":
 					state.settings.options.isHideTotalSum =
 						!state.settings.options.isHideTotalSum;
+					break;
+				case "TOGGLE_REPLICA_ORDER":
+					state.settings.options.isSwitchReplicaPlayers =
+						!state.settings.options.isSwitchReplicaPlayers;
 					break;
 				default:
 			}
@@ -141,5 +156,6 @@ export const {
 	changePlayerName,
 	addReplica,
 	toggleOption,
+	changeStageType,
 } = boardSlice.actions;
 export default boardSlice.reducer;

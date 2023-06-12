@@ -17,7 +17,7 @@ export default function Player({
 	playerId: number;
 	setup: number[];
 	stageId: number;
-	type?: "replica";
+	type?: "regular" | "replica";
 	values: string[];
 }) {
 	const breakValues = setup.map((value, idx) =>
