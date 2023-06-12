@@ -1,7 +1,8 @@
 import { TabsContent } from "@radix-ui/react-tabs";
 import React from "react";
 
-import { useBoardSelector } from "../hooks/hooks";
+import { useBoardDispatch, useBoardSelector } from "../hooks/hooks";
+import { changeStageType } from "../redux/slices/boardSlice";
 import AnswerInputs from "./answer-input-list";
 import Player from "./player";
 import TableBody from "./ui/vote-table";
@@ -9,6 +10,7 @@ import TableBody from "./ui/vote-table";
 export default function Board() {
 	const { stages, players } = useBoardSelector((state) => state.settings);
 	const scores = useBoardSelector((state) => state.scores.regular);
+	const dispatch = useBoardDispatch();
 	return (
 		<>
 			{stages.regular.map(({ name, setup, type }, stageIdx) => {
@@ -19,7 +21,7 @@ export default function Board() {
 						tabIndex={-1}
 						value={name}
 						key={stageIdx}
-						className="flex justify-center items-end"
+						className="flex flex-col justify-center items-center"
 					>
 						<TableBody setup={setup} stageName={name}>
 							{draftPlayers.map(({ id: playerId, name }) => {
@@ -33,6 +35,7 @@ export default function Board() {
 											values={values}
 											extraValues={extraValues}
 											name={name}
+											type="regular"
 										/>
 										{type === "MINUTE_ANS" &&
 											playerId === draftPlayers[1].id && (
@@ -42,6 +45,24 @@ export default function Board() {
 								);
 							})}
 						</TableBody>
+						{name === "Random" && (
+							<span className="absolute left-16 top-[114px] text-xs">
+								<label className="flex items-center gap-0.5">
+									<input
+										type="checkbox"
+										onChange={() =>
+											dispatch(
+												changeStageType({
+													stageId: stageIdx,
+													newType: type === "8X8" ? "MINUTE" : "8X8",
+												})
+											)
+										}
+									/>
+									Minuto Libre
+								</label>
+							</span>
+						)}
 					</TabsContent>
 				);
 			})}

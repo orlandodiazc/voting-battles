@@ -112,6 +112,16 @@ export const boardSlice = createSlice({
 			state.settings.players[playerId].name =
 				newName === "" ? `MC ${playerId + 1}` : newName;
 		},
+		changeStageType: (
+			state,
+			action: PayloadAction<{
+				newType: StageType;
+				stageId: number;
+			}>
+		) => {
+			const { stageId, newType } = action.payload;
+			state.settings.stages.regular[stageId].type = newType;
+		},
 		toggleOption: (
 			state,
 			action: PayloadAction<{
