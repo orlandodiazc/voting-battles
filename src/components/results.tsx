@@ -41,7 +41,7 @@ export default function Results() {
 	const scores = useBoardSelector((state) => state.scores);
 
 	return (
-		<div className="flex justify-center items-center relative h-[115px]">
+		<div className="flex justify-center items-center relative h-[113px]">
 			<h2 className="absolute text-sm text-destructive -top-2 left-8">
 				Resultados
 			</h2>

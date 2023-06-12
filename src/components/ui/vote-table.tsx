@@ -1,6 +1,6 @@
 import { ReactNode } from "react";
 
-import { RovingTabindexRoot } from "../roving-tabindex";
+import { RovingTabindexRoot } from "../roving";
 
 export default function TableBody({
 	setup,
@@ -12,7 +12,7 @@ export default function TableBody({
 	stageName: string;
 }) {
 	return (
-		<div className="h-[115px] relative">
+		<div className="h-[113px] relative">
 			<h2 className="text-sm text-destructive absolute -left-4 -top-3">
 				{stageName}
 			</h2>

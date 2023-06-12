@@ -15,7 +15,7 @@ export default function PlayerSums({ tabValue }: { tabValue: string }) {
 	return (
 		<div
 			className={twMerge(
-				"flex justify-center items-center h-full gap-3 text-xs bg-muted self-center px-3 py-2 leading-none rounded-t-sm",
+				"flex justify-center items-center h-full gap-3 text-xs bg-muted self-center px-3 py-2 leading-none rounded-sm",
 				(isPlayerTotalHidden || !isRegularStage) && "hidden"
 			)}
 		>
